@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/myImages">
+        <file>TJU9.jpg</file>
+        <file>Alogo.jpg</file>
+        <file>FVlogo.png</file>
+        <file>logo.jpg</file>
+        <file>Sglogo1.jpg</file>
+    </qresource>
+</RCC>
