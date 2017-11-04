@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/new/prefix1">
+        <file>image/desk.ico</file>
+        <file>image/image_open.ico</file>
+        <file>image/general.ico</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>Qss/black.qss</file>
+        <file>Qss/white.qss</file>
+    </qresource>
+</RCC>
