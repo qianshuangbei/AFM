@@ -18,7 +18,10 @@ SOURCES += main.cpp\
     tool_base.cpp \
     qcustomplot.cpp \
     loginui.cpp \
-    utils.cpp
+    utils.cpp \
+    connect/fileconnect.cpp \
+    manager/datamanager.cpp \
+    manager/nanomodule.cpp
 
 HEADERS  += mainwindow.h \
     rowparm.h \
@@ -26,7 +29,11 @@ HEADERS  += mainwindow.h \
     qcustomplot.h \
     loginui.h \
     fftw3.h \
-    utils.h
+    utils.h \
+    connect/fileconnect.h \
+    connect/filemodule.h \
+    manager/datamanager.h \
+    manager/nanomodule.h
 
 FORMS    += mainwindow.ui \
     loginui.ui
