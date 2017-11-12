@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     utils.cpp \
     connect/fileconnect.cpp \
     manager/datamanager.cpp \
-    manager/nanomodule.cpp
+    manager/nanomodule.cpp \
+    connect/filemodule.cpp
 
 HEADERS  += mainwindow.h \
     rowparm.h \
