@@ -10,7 +10,7 @@ public:
     bool ReadFile(const QString &filename);
     bool MemoryFile();
 private:
-    FileInfo _fileinfo;
+//    FileInfo _fileinfo;
 };
 
 #endif // FILECONNECT_H

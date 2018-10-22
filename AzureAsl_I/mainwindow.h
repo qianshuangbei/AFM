@@ -3,8 +3,8 @@
 
 #include <QMainWindow>
 #include <QVector>
-#include "rowparm.h"
 #include "qcustomplot.h"
+#include "manager/datamanager.h"
 
 
 class QPushButton;
@@ -27,8 +27,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    RowParm rowInfoZ;
-    double **N_matrix;     //当前数组
+//    double **N_matrix;     //当前数组
     QString p_filename;
     QVector<double**> ALL_mat ;
 
@@ -38,15 +37,15 @@ public:
     int sectionylength;
     int xoffset ;
     int yoffset ;
-    int m_size;
-    int n_size;
+    int m_size;     // 行数
+    int n_size;     // 列数
 
     QPoint lastPoint;
     QPoint endPoint;
     QPoint curPoint;
 public:
     void GenerateInformation();
-    bool LoadDataFile(const QString &fileName, const int Ti, double ** matrix);
+    bool LoadDataFile(const QString &fileName, const int index, double ** matrix);
     void SectionAddData(int x1, int y1, int x2, int y2);
     void InitAfterFile();
     void GenerateMain2DImage();
@@ -73,46 +72,23 @@ signals:
 
 private:
     Ui::MainWindow *ui;
-    QPixmap tempPix;  //辅助画布
 
-    QWidget *widget ;
-
-    QPushButton *ChannelButton;
-    QPushButton *excute;
-
-    QMouseEvent *Leftclick;
-
-    QPushButton * T_crossbtn ;
-
+    QPointF pos_00;
+    QPointF pos_mn;
+    DataManager *_datamanager;
     QLabel *mouseStartLabel;
     QLabel *mouseEndLabel;
     QLabel *mouseMoveLabel;
 
-    MainWindow *new_window;
-
-    QTableWidget *newtable;
-
-    QFrame *CLine;
-    QFrame *LBox;
-
-    QCustomPlot *R_customPlot;
-//    QCustomPlot *L_customPlot;
-    QCustomPlot *Double_customPlot;
-    QCustomPlot *Double_RcustomPlot;
-
-    QCPColorMap *colorMap;
+ //   QCPColorMap *colorMap;
     QCPColorMap* DoubleColorMap;
 
-
-
     bool PRESS_RELEASE ;
-    bool W_NEW;
     bool MouseActive;
     bool isDoubleChannel;
+    QVector<QVector<int>> PAST_SIZE;
 protected:
     void paintEvent(QPaintEvent *);
-
-
 
 };
 

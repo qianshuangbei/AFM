@@ -2,6 +2,7 @@
 
 Nanodata::Nanodata(){
 }
+
 ///////////---date---/////////////////
 bool Nanodata::has_date(){
     if(_nano.date != "")

@@ -2,7 +2,7 @@
 #include "plotlines.h"
 #include "tool_base.h"
 
-
+#include <iostream>
 #include "ui_mainwindow.h"
 #include <QFileDialog>
 #include <QIODevice>
@@ -24,7 +24,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    W_NEW = false;
     PRESS_RELEASE = false;
     MouseActive = false;
     isDoubleChannel= false;
@@ -64,47 +63,29 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-  /*   释放 有点问题
-    for (int i=0 ; i<m_size; i++)
-    {
-        delete [] N_matrix[i];
-    }
-    delete[] N_matrix;
-    delete ui;
-    */
+
 }
 
-bool MainWindow::LoadDataFile(const QString &fileName, const int Ti, double **matrix)
+bool MainWindow::LoadDataFile(const QString &fileName, const int index, double **matrix)
 {
 
     int16_t* a_pData = NULL;
-    a_pData = (int16_t*)malloc(rowInfoZ.r_length[Ti+1]);
+    a_pData = (int16_t*)malloc(_datamanager->data_length[index+1]);
 
-    int16_t **xmatrix;
-    xmatrix = new int16_t *[m_size];
-    for (int j =0; j<m_size ; j++)    {
-        xmatrix[j] =new int16_t [n_size];
-    }
     std::string nanofilename = fileName.toStdString();
     FILE *nanofile = fopen(nanofilename.c_str(), "rb");
-    fseek(nanofile , rowInfoZ.r_offset[0], 0);
-    fread( a_pData, 2, rowInfoZ.r_length[Ti+1]/2 , nanofile);
-    for(int i=0; i<m_size; i++){
-        xmatrix[i] = &a_pData[i*n_size];
-    }
+    fseek(nanofile , _datamanager->data_offset[0], 0);
+    fread( a_pData, 2, _datamanager->data_length[index+1]/2 , nanofile);
+    double zscale = _datamanager->data_zscale[index];
+    double sscale = _datamanager->data_sscale[index];
     for (int p=0; p<m_size ; p++ ){
         for(int q = 0; q<n_size ; q++){
-            N_matrix[p][q] = xmatrix[p][q]*(rowInfoZ.r_zscale[Ti]/65536)*rowInfoZ.r_sscale;
+            matrix[p][q] = a_pData[p*n_size + q]*(zscale/65536)*sscale;
         }
     }
 
-/*
-    for (int i=0 ; i<m_size; i++){
-        delete [] xmatrix[i];
-    }
-    delete[] xmatrix;
-*/
     free(a_pData);
+
     update();
     return true;
 }
@@ -113,66 +94,79 @@ bool MainWindow::LoadDataFile(const QString &fileName, const int Ti, double **ma
 
 void MainWindow::on_actionOpen_triggered()
 {
+    // 存储和读取 上一次打开位置
+    QFile opendefaultdir("defaultaddress.txt");
+    QString defaultdir;
+    QTextStream in(&opendefaultdir);
+    QTextStream out(&opendefaultdir);
+    opendefaultdir.open( QIODevice::ReadWrite|QIODevice::Text);
+    out>>defaultdir;
+    opendefaultdir.close();
 
-/*
- * 閰嶇疆姣忔鎵撳紑杞欢鐨勯粯璁よ矾寰
- *
-*/
-    if(!W_NEW){
-        QFile opendefaultdir("defaultaddress.txt");
-        QString defaultdir;
-        QTextStream in(&opendefaultdir);
-        QTextStream out(&opendefaultdir);
-        opendefaultdir.open( QIODevice::ReadWrite|QIODevice::Text);
-        out>>defaultdir;
-        opendefaultdir.close();
-        p_filename= QFileDialog::getOpenFileName(this, tr("Open AFM File"), defaultdir);
-        unsigned int i=p_filename.length()-1;
-        for(;i>1; i--)  if(p_filename[i]=='/') break;
-        opendefaultdir.open( QIODevice::ReadWrite|QIODevice::Text|QIODevice::Truncate);
-        defaultdir= p_filename==""?defaultdir: p_filename.left(i);
-        in<<defaultdir;
-        opendefaultdir.close();
+    p_filename= QFileDialog::getOpenFileName(this, tr("Open AFM File"), defaultdir);
+    unsigned int i=p_filename.length()-1;
+    for(;i>1; i--)  {
+        if(p_filename[i]=='/') break;
+    }
+    opendefaultdir.open( QIODevice::ReadWrite|QIODevice::Text|QIODevice::Truncate);
+    defaultdir= p_filename==""?defaultdir: p_filename.left(i);
+    in<<defaultdir;
+    opendefaultdir.close();
 
-    /*
-     * 璇诲彇鏂囦欢鍐呭
-    */
-        if(!p_filename.isEmpty()){
-            bool ok;
-            rowInfoZ.loadinfo(p_filename);
+    // 数据实例化
 
-            m_size = rowInfoZ.r_line.toInt(&ok, 10);
-            n_size = rowInfoZ.r_samlpel.toInt(&ok, 10);
+    if(!p_filename.isEmpty()){
 
-            N_matrix = new double *[m_size];
-            for (int j =0; j<m_size ; j++)
-            {
-                N_matrix[j] =new double [n_size];
+        _datamanager = DataManager::Instance();
+        _datamanager->LoadRowFile(p_filename);
+
+        m_size = _datamanager->_YSIZE;
+        n_size = _datamanager->_XSIZE;
+
+        double **N_matrix;     //当前数组
+        N_matrix = new double *[m_size];
+        for (int j =0; j<m_size ; j++)
+        {
+            N_matrix[j] =new double [n_size];
         }
-        ALL_mat.push_back(N_matrix);
-        int Channelnum = rowInfoZ.r_type.size();
-        for(int i=1; i<Channelnum; i++){
-            double** TempMat = new double *[m_size];
-            for(int j=0; j<m_size ; j++) TempMat[j] = new double [n_size];
-            ALL_mat.push_back(TempMat);
+
+        int index= 0 ;
+        for(size_t i = 0; i < _datamanager->type.size(); i++){
+            if(_datamanager->type[i] == "Height") {
+                index = i;
+            }
         }
-        W_NEW= true;
-        LoadDataFile(p_filename,0, N_matrix);
-        for(int i=1; i<Channelnum; i++){
-           LoadDataFile(p_filename,i, ALL_mat[i]);
+        if(!ALL_mat.size()){
+            ALL_mat.push_back(N_matrix);
+            PAST_SIZE.push_back({m_size, n_size});
+            InitAfterFile();
+        }else{
+            for(i = 0; i < PAST_SIZE[0][0]; i++)
+                    delete[] ALL_mat[0][i];
+            delete[] ALL_mat[0];
+            ALL_mat[0] = N_matrix;
+            PAST_SIZE[0][0] = m_size;
+            PAST_SIZE[0][1] = n_size;
         }
+        LoadDataFile(p_filename, index, ALL_mat.back());
+
+// 目前只导入了 Height类型的数据
+    //    int Channelnum = 1;
+    //    for(int i=1; i<Channelnum; i++){
+    //        double** TempMat = new double *[m_size];
+    //        for(int j=0; j<m_size ; j++) TempMat[j] = new double [n_size];
+    //        ALL_mat.push_back(TempMat);
+    //    }
+    //    for(int i=1; i<Channelnum; i++){
+    //       LoadDataFile(p_filename,i, ALL_mat[i]);
+    //    }
 
         ui->actionSection->setEnabled(true);
         ui->actionPower_Spectral_Denstiy->setEnabled(true);
-        InitAfterFile();
+
         GenerateMain2DImage();
         GenerateInformation();
 
-        }
-    }
-    else {
-        new_window = new MainWindow(this);
-        new_window->show();
     }
 }
 
@@ -227,18 +221,18 @@ void MainWindow::InitAfterFile(){
     mouseStartLabel = new QLabel();
     mouseStartLabel->setText("");
     mouseStartLabel->setFixedWidth(300);
+    statusBar()->addPermanentWidget(mouseStartLabel);
 
     mouseEndLabel = new QLabel();
     mouseEndLabel->setText("");
     mouseEndLabel->setFixedWidth(300);
+    statusBar()->addPermanentWidget(mouseEndLabel);
 
     mouseMoveLabel = new QLabel();
     mouseMoveLabel->setText("");
     mouseMoveLabel->setFixedWidth(300);
-
-    statusBar()->addPermanentWidget(mouseStartLabel);
-    statusBar()->addPermanentWidget(mouseEndLabel);
     statusBar()->addPermanentWidget(mouseMoveLabel);
+
 
     MouseActive = true;
     ui->TwoDImagePlot->setMouseTracking(true);
@@ -249,43 +243,46 @@ void MainWindow::InitAfterFile(){
 void MainWindow::GenerateMain2DImage(){
 
     ui->TwoDImagePlot->setVisible(true);
-
+    //    ui->TwoDImagePlot->plotLayout()->clear();
+    //    ui->TwoDImagePlot->plotLayout()->simplify();
 
     unsigned int writepart = (n_size- m_size)/(double)n_size*256;
     xoffset = 10;
     yoffset = 40+writepart;
 
     ui->TwoDImagePlot-> setGeometry(xoffset+5,yoffset,660,(double)m_size*574/n_size);
-    ui->TwoDImagePlot->axisRect()->setupFullAxesBox(true);
+    ui->TwoDImagePlot->axisRect()->setupFullAxesBox(false);
     ui->TwoDImagePlot->xAxis->setLabel("Height Sensor");
-    ui->TwoDImagePlot->yAxis->setTicks(false);
-    ui->TwoDImagePlot->yAxis->setTickLabels(false);
+    ui->TwoDImagePlot->yAxis->setTicks(true);
+    ui->TwoDImagePlot->yAxis->setTickLabels(true);
 
-    colorMap = new QCPColorMap(ui->TwoDImagePlot->xAxis, ui->TwoDImagePlot->yAxis);
-
+    QCPColorMap *colorMap = new QCPColorMap(ui->TwoDImagePlot->xAxis, ui->TwoDImagePlot->yAxis);
+    colorMap->data()->clear();
     colorMap->data()->setSize( n_size,m_size);
     colorMap->data()->setRange(QCPRange(0,n_size), QCPRange( 0,m_size));
-
-    double** matrix = ALL_mat[0];
+    double** matrix = ALL_mat.back();
     for (int xIndex=0; xIndex<m_size; ++xIndex){
       for (int yIndex=0; yIndex<n_size; ++yIndex){
         colorMap->data()->setCell(yIndex,xIndex,  matrix[xIndex][yIndex]);
       }
     }
-
     // add a color scale:
     QCPColorScale *colorScale = new QCPColorScale(ui->TwoDImagePlot);
-    ui->TwoDImagePlot->plotLayout()->addElement(0, 1, colorScale);
+    ui->TwoDImagePlot->plotLayout()->addElement(0,1, colorScale);
     colorScale->setType(QCPAxis::atRight);
     colorMap->setColorScale(colorScale);
     colorScale->axis()->setLabel("nm");
     colorMap->setGradient(QCPColorGradient::gpPolar);
     colorMap->rescaleDataRange();
+
     QCPMarginGroup *marginGroup = new QCPMarginGroup(ui->TwoDImagePlot);
     ui->TwoDImagePlot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
     colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
     ui->TwoDImagePlot->rescaleAxes();
     ui->TwoDImagePlot->replot();
+
+    pos_00 = colorMap->coordsToPixels(0,0);
+    pos_mn = colorMap->coordsToPixels(n_size,m_size);
 
     // add user Interactions
     ui->TwoDImagePlot->setInteractions(QCP::iSelectPlottables);
@@ -296,8 +293,7 @@ void MainWindow::GenerateMain2DImage(){
     connect(ui->TwoDImagePlot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
     connect(ui->TwoDImagePlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
 
-
-
+    ui->TwoDImagePlot->replot();
 }
 
 void MainWindow::GenerateInformation(){
@@ -319,16 +315,16 @@ void MainWindow::GenerateInformation(){
       ui->newtable->setItem(3,2,new QTableWidgetItem("Amplitude Setpoint"));
       ui->newtable->setItem(4,2,new QTableWidgetItem("Drive Amplitude"));
 
-      ui->newtable->setItem(0,1,new QTableWidgetItem(rowInfoZ.r_SS[0]));
-      ui->newtable->setItem(1,1,new QTableWidgetItem(rowInfoZ.r_rate));
-      ui->newtable->setItem(2,1,new QTableWidgetItem(rowInfoZ.r_samlpel));
-      ui->newtable->setItem(3,1,new QTableWidgetItem(rowInfoZ.r_line));
-      ui->newtable->setItem(4,1,new QTableWidgetItem(rowInfoZ.r_LD));
-      ui->newtable->setItem(0,3,new QTableWidgetItem(rowInfoZ.r_date));
-      ui->newtable->setItem(1,3,new QTableWidgetItem(rowInfoZ.r_AR));
-      ui->newtable->setItem(2,3,new QTableWidgetItem(rowInfoZ.r_CD));
-      ui->newtable->setItem(3,3,new QTableWidgetItem(rowInfoZ.r_AS));
-      ui->newtable->setItem(4,3,new QTableWidgetItem(rowInfoZ.r_DA));
+      ui->newtable->setItem(0,1,new QTableWidgetItem(_datamanager->scansize));
+      ui->newtable->setItem(1,1,new QTableWidgetItem(_datamanager->rate));
+      ui->newtable->setItem(2,1,new QTableWidgetItem(n_size));
+      ui->newtable->setItem(3,1,new QTableWidgetItem(m_size));
+      ui->newtable->setItem(4,1,new QTableWidgetItem(_datamanager->linedirection));
+      ui->newtable->setItem(0,3,new QTableWidgetItem(_datamanager->date));
+      ui->newtable->setItem(1,3,new QTableWidgetItem(_datamanager->ampsetpoint));
+      ui->newtable->setItem(2,3,new QTableWidgetItem(_datamanager->capturedirection));
+      ui->newtable->setItem(3,3,new QTableWidgetItem(_datamanager->ratio));
+      ui->newtable->setItem(4,3,new QTableWidgetItem(_datamanager->driveamp));
 
       ui->newtable->resizeColumnsToContents();
       ui->newtable->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -371,8 +367,7 @@ void MainWindow::on_actionSection_triggered()
 
 void MainWindow::SectionAddData(int x1, int y1, int x2, int y2){
 
-    QPointF pos_00 = colorMap->coordsToPixels(0,0);
-    QPointF pos_mn = colorMap->coordsToPixels(n_size,m_size);
+
     Tool_base *crossline1 = new Tool_base();
     crossline1->imagexoffset= pos_00.x();
     crossline1->imageyoffset= pos_00.y();
@@ -383,7 +378,7 @@ void MainWindow::SectionAddData(int x1, int y1, int x2, int y2){
 
 
     QVector<QVector<double> > Po_line;
-    Po_line= crossline1->Tool_CrossLine(ALL_mat[0] ,x1,y1,x2,y2);
+    Po_line= crossline1->Tool_CrossLine(ALL_mat.back() ,x1,y1,x2,y2);
     ui->CurveImagePlot->addGraph();
     ui->CurveImagePlot->graph(0)->setPen(QPen(Qt::blue));
     ui->CurveImagePlot->graph(0)->setBrush(QBrush(QColor(0, 0, 255, 20)));
@@ -404,7 +399,8 @@ void MainWindow::SectionAddData(int x1, int y1, int x2, int y2){
 
 
         QVector<QVector<double> > Po_line;
-        Po_line= crossline1->Tool_CrossLine(ALL_mat[5] ,x1,y1,x2,y2);
+  //      Po_line= crossline1->Tool_CrossLine(ALL_mat[5] ,x1,y1,x2,y2);
+        Po_line= crossline1->Tool_CrossLine(ALL_mat.back() ,x1,y1,x2,y2);
         ui->CurveImageIIPlot->addGraph();
         ui->CurveImageIIPlot->graph(0)->setPen(QPen(Qt::blue));
         ui->CurveImageIIPlot->graph(0)->setBrush(QBrush(QColor(0, 0, 255, 20)));
@@ -454,9 +450,9 @@ void MainWindow::on_actionPower_Spectral_Denstiy_triggered()
     Tool_base *PSD = new Tool_base();
     PSD->x_size= n_size;
     PSD->y_size= m_size;
-    PSD->x_scale=rowInfoZ.r_SS[0].toFloat();
-    QVector<QVector<double> >PSDResH = PSD->Tool_HPowerSpectralDensity(N_matrix);
-    QVector<QVector<double> >PSDResV = PSD->Tool_VPowerSpectralDensity(N_matrix);
+    PSD->x_scale=_datamanager->data_sscale[0];
+    QVector<QVector<double> >PSDResH = PSD->Tool_HPowerSpectralDensity(ALL_mat.back());
+    QVector<QVector<double> >PSDResV = PSD->Tool_VPowerSpectralDensity(ALL_mat.back());
 
     ui->CurveImagePlot->clearGraphs();
     ui->CurveImagePlot->replot();
@@ -502,7 +498,8 @@ void MainWindow::on_actionDouble_Channel_triggered()
     DoubleColorMap = new QCPColorMap(ui->TwoDImageIIPlot->xAxis, ui->TwoDImageIIPlot->yAxis);
     DoubleColorMap->data()->setSize(n_size,m_size);
     DoubleColorMap->data()->setRange(QCPRange(0,n_size), QCPRange( 0,m_size));
-    double** matrix = ALL_mat[5];
+  //  double** matrix = ALL_mat[5];
+    double** matrix = ALL_mat.back();
     for (int xIndex=0; xIndex<m_size; ++xIndex){
       for (int yIndex=0; yIndex<n_size; ++yIndex){
         DoubleColorMap->data()->setCell(yIndex,xIndex,  matrix[xIndex][yIndex]);

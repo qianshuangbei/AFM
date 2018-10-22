@@ -12,7 +12,7 @@ class FileModule{
 public:
     QString filename;
     QString filepath;
-    bool copyfilename(const QStirng &filename);
+//    bool copyfilename(const QStirng &filename);
 
 };
 

@@ -25,9 +25,7 @@ public:
         QVector<double> data_zscale;
         QVector<double> data_sscale;
 
-        // data Info;
-        int16_t **matrix;
-    };
+    }_nano;
 
     Nanodata();
     bool has_date();
@@ -82,7 +80,7 @@ public:
     double data_sscale(const uint32_t &input);
 
 private:
-    Nano _nano;
+
 };
 
 

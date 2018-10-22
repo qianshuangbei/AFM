@@ -14,18 +14,15 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    rowparm.cpp \
     tool_base.cpp \
     qcustomplot.cpp \
     loginui.cpp \
     utils.cpp \
     connect/fileconnect.cpp \
     manager/datamanager.cpp \
-    manager/nanomodule.cpp \
     connect/filemodule.cpp
 
 HEADERS  += mainwindow.h \
-    rowparm.h \
     tool_base.h \
     qcustomplot.h \
     loginui.h \
@@ -33,8 +30,7 @@ HEADERS  += mainwindow.h \
     utils.h \
     connect/fileconnect.h \
     connect/filemodule.h \
-    manager/datamanager.h \
-    manager/nanomodule.h
+    manager/datamanager.h
 
 FORMS    += mainwindow.ui \
     loginui.ui

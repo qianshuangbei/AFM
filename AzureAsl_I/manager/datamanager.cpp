@@ -3,13 +3,22 @@
 #include <QFile>
 #include <QTextStream>
 
-
+DataManager* DataManager::_instance = NULL;
 DataManager::DataManager()
-{
-
+{   
 }
 
-bool DataManager::LoadRowFile(const QString &fileName, Nanodata *response){
+DataManager * DataManager::Instance(){
+
+    _instance = new DataManager();
+
+    return _instance;
+}
+
+bool DataManager::LoadRowFile(const QString &fileName){
+    if(_instance == NULL){
+        std::cout<<"ERROR: instance!!!";
+    }
     QFile file(fileName);
     QString curline;
 
@@ -27,8 +36,8 @@ bool DataManager::LoadRowFile(const QString &fileName, Nanodata *response){
         curline = out.readLine();
 
         if(curline.contains("Description",Qt::CaseInsensitive)){
-            curline.remove(0,14);
-            response->set_date(curline);
+            curline.remove(0,14);            
+            _instance->description = curline;
         }else if(curline.contains("Data offset",Qt::CaseInsensitive)){
             curline.remove(0,14);
             curline.trimmed();
@@ -37,7 +46,7 @@ bool DataManager::LoadRowFile(const QString &fileName, Nanodata *response){
                 std::cout<< "ERROR: dataoffset is negative";
                 return false;
             }
-            response->append_data_offset(tempnum);
+            _instance->data_offset.push_back(tempnum);
         }else if(curline.contains("Data length",Qt::CaseInsensitive)){
             curline.remove(0,14);
             curline.trimmed();
@@ -46,28 +55,28 @@ bool DataManager::LoadRowFile(const QString &fileName, Nanodata *response){
                 std::cout<< "ERROR: dataoffset is negative";
                 return false;
             }
-            response->append_data_length(tempnum);
+            _instance->data_length.push_back(tempnum);
         }else if(curline.contains("Image Data",Qt::CaseInsensitive)){
             curline.remove(0,curline.indexOf("\"")+1);
             const QString temp = curline.left(curline.size()-1);
-            response->set_type(temp);
+            _instance->type.push_back(temp);
         }else if(curline.contains("2:Z scale:",Qt::CaseInsensitive)){
            QString tmp =curline.mid( curline.indexOf(")")+1, 8);
            tmp.trimmed();
-           response->append_data_zscale(tmp.toDouble());
+           _instance->data_zscale.push_back(tmp.toDouble());
         }else if(curline.contains("@Sens. ZsensSens",Qt::CaseInsensitive)){
            QString tmp =curline.mid( curline.indexOf("V")+1, 8);
            tmp.trimmed();
-           response->append_data_sscale(tmp.toDouble());
+           _instance->data_sscale.push_back(tmp.toDouble());
         }
         else if(curline.contains("Date:",Qt::CaseInsensitive)){
             curline.remove(0,7);
             curline.trimmed();
-            response->set_date(curline);
+            _instance->date = curline;
         }else if(curline.contains("\\Scan Rate:",Qt::CaseInsensitive)){
             curline.remove(0,12);
             curline.trimmed();
-            response->set_rate(curline);
+            _instance->rate = curline;
         }else if(curline.contains("\\Valid data len X:",Qt::CaseInsensitive)){
             curline.remove(0,18);
             curline.trimmed();
@@ -75,7 +84,7 @@ bool DataManager::LoadRowFile(const QString &fileName, Nanodata *response){
                 std::cout<< "ERROR: image size is negative";
                 return false;
             }
-            response->set_Xsize(curline);
+            _instance->_XSIZE = curline.toInt();
         }
         else if(curline.contains("\\Valid data len Y:",Qt::CaseInsensitive)){
             curline.remove(0,18);
@@ -84,22 +93,22 @@ bool DataManager::LoadRowFile(const QString &fileName, Nanodata *response){
                 std::cout<< "ERROR: image size is negative";
                 return false;
             }
-            response->set_Ysize(curline);
+            _instance->_YSIZE = curline.toInt();
         }
         else if(curline.contains("\\Line Direction:",Qt::CaseInsensitive)){
             curline.remove(0,17);
             curline.trimmed();
-            response->set_linedirection(curline);
+            _instance->linedirection = curline;
         }
         else if(curline.contains("\\Capture direction:",Qt::CaseInsensitive)){
             curline.remove(0,20);
             curline.trimmed();
-            response->set_capturedirection(curline);
+            _instance->capturedirection = curline;
         }
         else if(curline.contains("\\@2:CantDrive: ",Qt::CaseInsensitive)){
             curline.remove(0, curline.indexOf(")")+1);
             curline.trimmed();
-            response->set_driveamp(curline);
+            _instance->driveamp = curline;
         }
         else if(curline.contains("\\Scan Size:",Qt::CaseInsensitive)){
             curline.remove(0,12);
@@ -107,17 +116,17 @@ bool DataManager::LoadRowFile(const QString &fileName, Nanodata *response){
             int i=0;
             for(; i<curline.length();i++) if(curline[i]<'0'||curline[0]>'9') break;
             QString temp = curline.left(i);
-            response->set_scansize(temp);
+            _instance->scansize = temp;
         }
         else if(curline.contains("\\@2:SCMFeedbackSetpoint:",Qt::CaseInsensitive)){
             curline.remove(0, curline.indexOf(")")+1);
             curline.trimmed();
-            response->set_ampsetpoint(curline);
+            _instance->ampsetpoint = curline;
         }
         else if(curline.contains("\\Aspect Ratio:",Qt::CaseInsensitive)){
             curline.remove(0, 15);
             curline.trimmed();
-            response->set_ratio(curline);
+            _instance->ratio = curline;
         }
 
 
@@ -126,6 +135,3 @@ bool DataManager::LoadRowFile(const QString &fileName, Nanodata *response){
     return false;
 }
 
-bool DataManager::LoadDataFile(const QString &filename, Nanodata *response){
-
-}
