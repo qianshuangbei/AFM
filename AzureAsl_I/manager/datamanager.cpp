@@ -98,7 +98,7 @@ bool DataManager::LoadRowFile(const QString &fileName){
         else if(curLine.contains("\\Line Direction:",Qt::CaseInsensitive)){
             curLine.remove(0,17);
             curLine.trimmed();
-            _instance->ySize = curLine;
+            _instance->lineDirection = curLine;
         }
         else if(curLine.contains("\\Capture direction:",Qt::CaseInsensitive)){
             curLine.remove(0,20);

@@ -5,17 +5,17 @@
 class DataManager
 {
 public:
-    unsigned int xSIZE;
-    unsigned int ySIZE;
+    unsigned int xSize;
+    unsigned int ySize;
     QString date;
     QString description;
     QString rate;
     QString lineDirection;
     QString captureDirection;
-    QString driveamp;
-    QString scansize;
+    QString driveAmp;
+    QString scanSize;
     QString ratio;
-    QString ampsetpoint;
+    QString ampSetPoint;
     QVector<QString> type;
     QVector<uint32_t> dataOffset;
     QVector<uint32_t> dataLength;

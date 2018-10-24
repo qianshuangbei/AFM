@@ -1,8 +1,6 @@
 #include "mainwindow.h"
-#include "plotlines.h"
-#include "tool_base.h"
-#include <iostream>
 #include "ui_mainwindow.h"
+#include <iostream>
 #include <QFileDialog>
 #include <QIODevice>
 #include <QPainter>
@@ -11,10 +9,13 @@
 #include <QTextStream>
 #include <QLayout>
 #include <QPushButton>
-#include "math.h"
 #include<QTableWidget>
 #include <QTableWidgetItem>
 #include <QMouseEvent>
+#include <QtDataVisualization>
+#include "math.h"
+#include "plotlines.h"
+#include "tool_base.h"
 
 
 
@@ -36,17 +37,14 @@ MainWindow::MainWindow(QWidget *parent) :
     QPalette mainwindowColor(this->palette());
     mainwindowColor.setColor(QPalette::Background, QColor(232, 241, 252));
     this->setPalette(mainwindowColor);
-
 /*
  * 失能
 */
     ui->actionSection->setDisabled(true);
     ui->actionRoughness->setDisabled(true);
-
 /*
  * 初始化隐藏部件
 */
-
     ui->newtable->setVisible(false);
     ui->TwoDImagePlot->setVisible(false);
     ui->CurveImagePlot->setVisible(false);
@@ -63,14 +61,14 @@ MainWindow::~MainWindow()
 bool MainWindow::LoadDataFile(const QString &fileName, const int index, double **matrix)
 {
     int16_t* pData = NULL;
-    pData = (int16_t*)malloc(_dataManager->data_length[index+1]);
+    pData = (int16_t*)malloc(_dataManager->dataLength[index+1]);
 
     std::string nanoFileName = fileName.toStdString();
     FILE *nanoFile = fopen(nanoFileName.c_str(), "rb");
-    fseek(nanoFile , _dataManager->data_offset[0], 0);
-    fread( pData, 2, _dataManager->data_length[index+1]/2 , nanoFile);
-    double zScale = _dataManager->data_zscale[index];
-    double sScale = _dataManager->data_sscale[index];
+    fseek(nanoFile , _dataManager->dataOffset[0], 0);
+    fread( pData, 2, _dataManager->dataLength[index+1]/2 , nanoFile);
+    double zScale = _dataManager->dataZScale[index];
+    double sScale = _dataManager->dataSScale[index];
     for (int p=0; p < mSize ; p++){
         for(int q = 0; q < nSize ; q++){
             matrix[p][q] = pData[p*nSize + q]*(zScale/65536)*sScale;
@@ -80,8 +78,6 @@ bool MainWindow::LoadDataFile(const QString &fileName, const int index, double *
     update();
     return true;
 }
-
-
 
 void MainWindow::on_actionOpen_triggered()
 {
@@ -111,9 +107,8 @@ void MainWindow::on_actionOpen_triggered()
         _dataManager = DataManager::Instance();
         _dataManager->LoadRowFile(_fileName);
 
-        mSize = _dataManager->_YSIZE;
-        nSize = _dataManager->_XSIZE;
-
+        mSize = _dataManager->ySize;
+        nSize = _dataManager->xSize;
         double **matrix;     //当前数组
         matrix = new double *[mSize];
         for (int j =0; j<mSize ; j++)
@@ -122,7 +117,7 @@ void MainWindow::on_actionOpen_triggered()
         }
 
         int index= 0 ;
-        for(size_t i = 0; i < _dataManager->type.size(); i++){
+        for(i = 0; i < _dataManager->type.size(); i++){
             if(_dataManager->type[i] == "Height") {
                 index = i;
             }
@@ -141,7 +136,7 @@ void MainWindow::on_actionOpen_triggered()
         }
         LoadDataFile(_fileName, index, allChannel.back());
 
-// 目前只导入了 Height类型的数据
+    // 目前只导入了 Height类型的数据
     //    int Channelnum = 1;
     //    for(int i=1; i<Channelnum; i++){
     //        double** TempMat = new double *[mSize];
@@ -303,16 +298,16 @@ void MainWindow::GenerateInformation(){
       ui->newtable->setItem(3, 2, new QTableWidgetItem("Amplitude Setpoint"));
       ui->newtable->setItem(4, 2, new QTableWidgetItem("Drive Amplitude"));
 
-      ui->newtable->setItem(0, 1, new QTableWidgetItem(_dataManager->scansize));
+      ui->newtable->setItem(0, 1, new QTableWidgetItem(_dataManager->scanSize));
       ui->newtable->setItem(1, 1, new QTableWidgetItem(_dataManager->rate));
       ui->newtable->setItem(2, 1, new QTableWidgetItem(nSize));
       ui->newtable->setItem(3, 1, new QTableWidgetItem(mSize));
-      ui->newtable->setItem(4, 1, new QTableWidgetItem(_dataManager->linedirection));
+      ui->newtable->setItem(4, 1, new QTableWidgetItem(_dataManager->lineDirection));
       ui->newtable->setItem(0, 3, new QTableWidgetItem(_dataManager->date));
-      ui->newtable->setItem(1, 3, new QTableWidgetItem(_dataManager->ampsetpoint));
-      ui->newtable->setItem(2, 3, new QTableWidgetItem(_dataManager->capturedirection));
+      ui->newtable->setItem(1, 3, new QTableWidgetItem(_dataManager->ampSetPoint));
+      ui->newtable->setItem(2, 3, new QTableWidgetItem(_dataManager->captureDirection));
       ui->newtable->setItem(3, 3, new QTableWidgetItem(_dataManager->ratio));
-      ui->newtable->setItem(4, 3, new QTableWidgetItem(_dataManager->driveamp));
+      ui->newtable->setItem(4, 3, new QTableWidgetItem(_dataManager->driveAmp));
 
       ui->newtable->resizeColumnsToContents();
       ui->newtable->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -429,7 +424,7 @@ void MainWindow::on_actionPower_Spectral_Denstiy_triggered()
     ToolBase *psd = new ToolBase();
     psd->xSize= nSize;
     psd->ySize= mSize;
-    psd->xScale=_dataManager->data_sscale[0];
+    psd->xScale=_dataManager->dataSScale[0];
     QVector<QVector<double> >psdResH = psd->ToolHPowerSpectralDensity(allChannel.back());
     QVector<QVector<double> >psdResV = psd->ToolVPowerSpectralDensity(allChannel.back());
 
@@ -492,4 +487,10 @@ void MainWindow::on_actionDouble_Channel_triggered()
     ui->TwoDImageIIPlot->replot();
 
     _isDoubleChannel = true;
+}
+
+void MainWindow::on_actionThree_Dimension_triggered()
+{
+
+
 }

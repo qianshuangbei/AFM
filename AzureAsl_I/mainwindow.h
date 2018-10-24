@@ -56,6 +56,8 @@ private slots:
     void mouseMoveEvent(QMouseEvent *event);
     void on_actionDouble_Channel_triggered();
 
+    void on_actionThree_Dimension_triggered();
+
 signals:
     void mousePress(QMouseEvent*);
     void mouseRelease(QMouseEvent*);
