@@ -85,7 +85,6 @@ bool MainWindow::LoadDataFile(const QString &fileName, const int index, double *
     }
 
     free(a_pData);
-
     update();
     return true;
 }
@@ -329,21 +328,12 @@ void MainWindow::GenerateInformation(){
       ui->newtable->resizeColumnsToContents();
       ui->newtable->setEditTriggers(QAbstractItemView::NoEditTriggers);
       ui->newtable->setVisible(true);
-
-
-
-
-
-
-
-
 }
 
 
 void MainWindow::on_actionSection_triggered()
 {
     ui->TwoDImagePlot->setSelectionRectMode(QCP::srmRaphLine);
-
     ui->CurveImagePlot->setGeometry(700,50,700,400);
     ui->CurveImagePlot->clearGraphs();
     ui->CurveImagePlot->replot();
@@ -362,7 +352,6 @@ void MainWindow::on_actionSection_triggered()
         ui->CurveImageIIPlot->setInteractions( QCP::iRangeZoom | QCP::iSelectPlottables| QCP::iRangeDrag);
 
     }
-
 }
 
 void MainWindow::SectionAddData(int x1, int y1, int x2, int y2){

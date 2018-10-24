@@ -114,6 +114,7 @@
     <addaction name="actionSection"/>
     <addaction name="actionRoughness"/>
     <addaction name="actionPower_Spectral_Denstiy"/>
+    <addaction name="actionFlatten"/>
    </widget>
    <widget class="QMenu" name="menuFilters">
     <property name="title">
@@ -197,6 +198,11 @@
   <action name="actionDouble_Channel">
    <property name="text">
     <string>Double Channel</string>
+   </property>
+  </action>
+  <action name="actionFlatten">
+   <property name="text">
+    <string>Flatten</string>
    </property>
   </action>
  </widget>

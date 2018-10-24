@@ -59,9 +59,6 @@ private slots:
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
-
-
-
     void on_actionDouble_Channel_triggered();
 
 signals:
@@ -72,7 +69,6 @@ signals:
 
 private:
     Ui::MainWindow *ui;
-
     QPointF pos_00;
     QPointF pos_mn;
     DataManager *_datamanager;
