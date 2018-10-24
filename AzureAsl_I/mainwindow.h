@@ -14,7 +14,7 @@ class MainWindow;
 enum Rp_Analysis{
      RpSection               =0x001,
      RpRoughness             =0x002,
-     RpPowerSpecralDensity  =0x003
+     RpPowerSpecralDensity   =0x003
 };
 
 }
@@ -28,17 +28,12 @@ public:
     ~MainWindow();
 
 //    double **N_matrix;     //当前数组
-    QString p_filename;
-    QVector<double**> ALL_mat ;
+    QVector<double**> allChannel ;
 
-    int sectionxoffset;
-    int sectionyoffset;
-    int sectionxlength;
-    int sectionylength;
-    int xoffset ;
-    int yoffset ;
-    int m_size;     // 行数
-    int n_size;     // 列数
+    int xOffset ;
+    int yOffset ;
+    int mSize;     // 行数
+    int nSize;     // 列数
 
     QPoint lastPoint;
     QPoint endPoint;
@@ -68,24 +63,22 @@ signals:
 
 
 private:
+    QString _fileName;
     Ui::MainWindow *ui;
-    QPointF pos_00;
-    QPointF pos_mn;
-    DataManager *_datamanager;
-    QLabel *mouseStartLabel;
-    QLabel *mouseEndLabel;
-    QLabel *mouseMoveLabel;
+    QPointF _pos00;
+    QPointF _posmn;
+    DataManager *_dataManager;
+    QLabel *_mouseStartLabel;
+    QLabel *_mouseEndLabel;
+    QLabel *_mouseMoveLabel;
+    QCPColorMap* _doubleColorMap;
+    QVector<QVector<int>> _pastSize;
 
- //   QCPColorMap *colorMap;
-    QCPColorMap* DoubleColorMap;
-
-    bool PRESS_RELEASE ;
-    bool MouseActive;
-    bool isDoubleChannel;
-    QVector<QVector<int>> PAST_SIZE;
+    bool _pressRelease ;
+    bool _mouseActive;
+    bool _isDoubleChannel;
 protected:
     void paintEvent(QPaintEvent *);
-
 };
 
 inline void FunctionSwitchBuffer(Ui::Rp_Analysis side){

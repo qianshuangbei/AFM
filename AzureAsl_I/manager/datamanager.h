@@ -5,26 +5,26 @@
 class DataManager
 {
 public:
-    unsigned int _XSIZE;
-    unsigned int _YSIZE;
+    unsigned int xSIZE;
+    unsigned int ySIZE;
     QString date;
     QString description;
     QString rate;
-    QString linedirection;
-    QString capturedirection;
+    QString lineDirection;
+    QString captureDirection;
     QString driveamp;
     QString scansize;
     QString ratio;
     QString ampsetpoint;
     QVector<QString> type;
-    QVector<uint32_t> data_offset;
-    QVector<uint32_t> data_length;
-    QVector<double> data_zscale;
-    QVector<double> data_sscale;
-    double **N_matrix;
+    QVector<uint32_t> dataOffset;
+    QVector<uint32_t> dataLength;
+    QVector<double> dataZScale;
+    QVector<double> dataSScale;
+    double **matrix;
 
 public:
-    bool LoadRowFile(const QString &filename);
+    bool LoadRowFile(const QString &fileName);
     static DataManager *Instance();
 
 protected:

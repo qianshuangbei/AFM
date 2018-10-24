@@ -17,14 +17,14 @@ public:
 /*
  * Parameters to adjust pattern;
 */
-    struct Codeparam{
-        QString Code;
-        int Code_Toum;
-        int Code_Yval;
-        int Code_speed;
-        int Code_size;
-        int Code_position;
-        Codeparam(int y,int sp, int si, int p):Code_Yval(y),Code_speed(sp), Code_size(si), Code_position(p){}
+    struct codeParam{
+        QString code;
+        int codeToum;
+        int codeYval;
+        int codeSpeed;
+        int codeSize;
+        int codePosition;
+        codeParam(int y,int sp, int si, int p):codeYval(y),codeSpeed(sp), codeSize(si), codePosition(p){}
 
     };
 
@@ -32,19 +32,19 @@ public:
     explicit LoginUI(QWidget *parent = 0);
     void paintEvent(QPaintEvent*event);
     void timerEvent(QTimerEvent *event);
-    void init_code(Codeparam*codevc);
-    ~LoginUI();
+    void init_code(codeParam*codevc);
 
+    ~LoginUI();
 private slots:
     void on_Loginbtn_clicked();
 
 private:
     Ui::LoginUI *ui;
-    QPainter *painter;
-    QVector<Codeparam*> codevct;
-    int xtime;
-    int timestamp;
-    const static unsigned int CODESIZE= 100;
+    QPainter *_painter;
+    QVector<codeParam*> _codevct;
+    int _xTime;
+    int _timeStamp;
+    const static unsigned int _CODESIZE= 100;
 
 };
 

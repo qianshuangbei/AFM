@@ -20,118 +20,118 @@ bool DataManager::LoadRowFile(const QString &fileName){
         std::cout<<"ERROR: instance!!!";
     }
     QFile file(fileName);
-    QString curline;
+    QString curLine;
 
     if(!file.open(QFile::ReadOnly|QFile::Text)){
         std::cout<< "ERROR: read file fail";
         return false;
     }
     QTextStream out(&file);
-    curline = out.readLine();
-    if (!curline.contains("File list")) {
+    curLine = out.readLine();
+    if (!curLine.contains("File list")) {
         std::cout<< "ERROR: AFM Head error";
         return false;
     }
     do{
-        curline = out.readLine();
+        curLine = out.readLine();
 
-        if(curline.contains("Description",Qt::CaseInsensitive)){
-            curline.remove(0,14);            
-            _instance->description = curline;
-        }else if(curline.contains("Data offset",Qt::CaseInsensitive)){
-            curline.remove(0,14);
-            curline.trimmed();
-            const int tempnum = curline.toInt();
+        if(curLine.contains("Description",Qt::CaseInsensitive)){
+            curLine.remove(0,14);
+            _instance->description = curLine;
+        }else if(curLine.contains("Data offset",Qt::CaseInsensitive)){
+            curLine.remove(0,14);
+            curLine.trimmed();
+            const int tempnum = curLine.toInt();
             if(tempnum < 0){
                 std::cout<< "ERROR: dataoffset is negative";
                 return false;
             }
-            _instance->data_offset.push_back(tempnum);
-        }else if(curline.contains("Data length",Qt::CaseInsensitive)){
-            curline.remove(0,14);
-            curline.trimmed();
-            const int tempnum = curline.toInt();
+            _instance->dataOffset.push_back(tempnum);
+        }else if(curLine.contains("Data length",Qt::CaseInsensitive)){
+            curLine.remove(0,14);
+            curLine.trimmed();
+            const int tempnum = curLine.toInt();
             if(tempnum < 0){
                 std::cout<< "ERROR: dataoffset is negative";
                 return false;
             }
-            _instance->data_length.push_back(tempnum);
-        }else if(curline.contains("Image Data",Qt::CaseInsensitive)){
-            curline.remove(0,curline.indexOf("\"")+1);
-            const QString temp = curline.left(curline.size()-1);
+            _instance->dataLength.push_back(tempnum);
+        }else if(curLine.contains("Image Data",Qt::CaseInsensitive)){
+            curLine.remove(0,curLine.indexOf("\"")+1);
+            const QString temp = curLine.left(curLine.size()-1);
             _instance->type.push_back(temp);
-        }else if(curline.contains("2:Z scale:",Qt::CaseInsensitive)){
-           QString tmp =curline.mid( curline.indexOf(")")+1, 8);
+        }else if(curLine.contains("2:Z scale:",Qt::CaseInsensitive)){
+           QString tmp =curLine.mid( curLine.indexOf(")")+1, 8);
            tmp.trimmed();
-           _instance->data_zscale.push_back(tmp.toDouble());
-        }else if(curline.contains("@Sens. ZsensSens",Qt::CaseInsensitive)){
-           QString tmp =curline.mid( curline.indexOf("V")+1, 8);
+           _instance->dataZScale.push_back(tmp.toDouble());
+        }else if(curLine.contains("@Sens. ZsensSens",Qt::CaseInsensitive)){
+           QString tmp =curLine.mid( curLine.indexOf("V")+1, 8);
            tmp.trimmed();
-           _instance->data_sscale.push_back(tmp.toDouble());
+           _instance->dataSScale.push_back(tmp.toDouble());
         }
-        else if(curline.contains("Date:",Qt::CaseInsensitive)){
-            curline.remove(0,7);
-            curline.trimmed();
-            _instance->date = curline;
-        }else if(curline.contains("\\Scan Rate:",Qt::CaseInsensitive)){
-            curline.remove(0,12);
-            curline.trimmed();
-            _instance->rate = curline;
-        }else if(curline.contains("\\Valid data len X:",Qt::CaseInsensitive)){
-            curline.remove(0,18);
-            curline.trimmed();
-            if (curline.toInt()<0) {
+        else if(curLine.contains("Date:",Qt::CaseInsensitive)){
+            curLine.remove(0,7);
+            curLine.trimmed();
+            _instance->date = curLine;
+        }else if(curLine.contains("\\Scan Rate:",Qt::CaseInsensitive)){
+            curLine.remove(0,12);
+            curLine.trimmed();
+            _instance->rate = curLine;
+        }else if(curLine.contains("\\Valid data len X:",Qt::CaseInsensitive)){
+            curLine.remove(0,18);
+            curLine.trimmed();
+            if (curLine.toInt()<0) {
                 std::cout<< "ERROR: image size is negative";
                 return false;
             }
-            _instance->_XSIZE = curline.toInt();
+            _instance->xSize = curLine.toInt();
         }
-        else if(curline.contains("\\Valid data len Y:",Qt::CaseInsensitive)){
-            curline.remove(0,18);
-            curline.trimmed();
-            if (curline.toInt()<0) {
+        else if(curLine.contains("\\Valid data len Y:",Qt::CaseInsensitive)){
+            curLine.remove(0,18);
+            curLine.trimmed();
+            if (curLine.toInt()<0) {
                 std::cout<< "ERROR: image size is negative";
                 return false;
             }
-            _instance->_YSIZE = curline.toInt();
+            _instance->ySize = curLine.toInt();
         }
-        else if(curline.contains("\\Line Direction:",Qt::CaseInsensitive)){
-            curline.remove(0,17);
-            curline.trimmed();
-            _instance->linedirection = curline;
+        else if(curLine.contains("\\Line Direction:",Qt::CaseInsensitive)){
+            curLine.remove(0,17);
+            curLine.trimmed();
+            _instance->ySize = curLine;
         }
-        else if(curline.contains("\\Capture direction:",Qt::CaseInsensitive)){
-            curline.remove(0,20);
-            curline.trimmed();
-            _instance->capturedirection = curline;
+        else if(curLine.contains("\\Capture direction:",Qt::CaseInsensitive)){
+            curLine.remove(0,20);
+            curLine.trimmed();
+            _instance->captureDirection = curLine;
         }
-        else if(curline.contains("\\@2:CantDrive: ",Qt::CaseInsensitive)){
-            curline.remove(0, curline.indexOf(")")+1);
-            curline.trimmed();
-            _instance->driveamp = curline;
+        else if(curLine.contains("\\@2:CantDrive: ",Qt::CaseInsensitive)){
+            curLine.remove(0, curLine.indexOf(")")+1);
+            curLine.trimmed();
+            _instance->driveAmp = curLine;
         }
-        else if(curline.contains("\\Scan Size:",Qt::CaseInsensitive)){
-            curline.remove(0,12);
-            curline.trimmed();
+        else if(curLine.contains("\\Scan Size:",Qt::CaseInsensitive)){
+            curLine.remove(0,12);
+            curLine.trimmed();
             int i=0;
-            for(; i<curline.length();i++) if(curline[i]<'0'||curline[0]>'9') break;
-            QString temp = curline.left(i);
-            _instance->scansize = temp;
+            for(; i<curLine.length();i++) if(curLine[i]<'0'||curLine[0]>'9') break;
+            QString temp = curLine.left(i);
+            _instance->scanSize = temp;
         }
-        else if(curline.contains("\\@2:SCMFeedbackSetpoint:",Qt::CaseInsensitive)){
-            curline.remove(0, curline.indexOf(")")+1);
-            curline.trimmed();
-            _instance->ampsetpoint = curline;
+        else if(curLine.contains("\\@2:SCMFeedbackSetpoint:",Qt::CaseInsensitive)){
+            curLine.remove(0, curLine.indexOf(")")+1);
+            curLine.trimmed();
+            _instance->ampSetPoint = curLine;
         }
-        else if(curline.contains("\\Aspect Ratio:",Qt::CaseInsensitive)){
-            curline.remove(0, 15);
-            curline.trimmed();
-            _instance->ratio = curline;
+        else if(curLine.contains("\\Aspect Ratio:",Qt::CaseInsensitive)){
+            curLine.remove(0, 15);
+            curLine.trimmed();
+            _instance->ratio = curLine;
         }
 
 
     }
-    while(!curline.contains("*File list end"));
+    while(!curLine.contains("*File list end"));
     return false;
 }
 
