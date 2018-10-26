@@ -1,0 +1,15 @@
+INPUT(
+./release\main.o
+./release\mainwindow.o
+./release\tool_base.o
+./release\qcustomplot.o
+./release\loginui.o
+./release\utils.o
+./release\fileconnect.o
+./release\datamanager.o
+./release\filemodule.o
+./release\qrc_src.o
+./release\moc_mainwindow.o
+./release\moc_qcustomplot.o
+./release\moc_loginui.o
+);
