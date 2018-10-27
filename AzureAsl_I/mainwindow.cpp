@@ -570,18 +570,22 @@ void MainWindow::on_actionThree_Dimension_triggered()
     axisMinSliderX->setMinimum(-10);
     axisMinSliderX->setTickInterval(1);
     axisMinSliderX->setEnabled(true);
+    axisMinSliderX->setVisible(false);
     QSlider *axisMaxSliderX = new QSlider(Qt::Horizontal, widget);
     axisMaxSliderX->setMinimum(1);
     axisMaxSliderX->setTickInterval(1);
     axisMaxSliderX->setEnabled(true);
+    axisMaxSliderX->setVisible(false);
     QSlider *axisMinSliderZ = new QSlider(Qt::Horizontal, widget);
     axisMinSliderZ->setMinimum(-10);
     axisMinSliderZ->setTickInterval(1);
     axisMinSliderZ->setEnabled(true);
+    axisMinSliderZ->setVisible(false);
     QSlider *axisMaxSliderZ = new QSlider(Qt::Horizontal, widget);
     axisMaxSliderZ->setMinimum(1);
     axisMaxSliderZ->setTickInterval(1);
     axisMaxSliderZ->setEnabled(true);
+    axisMaxSliderZ->setVisible(false);
 
     QComboBox *themeList = new QComboBox(widget);
     themeList->addItem(QStringLiteral("Qt"));
@@ -627,12 +631,12 @@ void MainWindow::on_actionThree_Dimension_triggered()
 
     vLayout->addWidget(modelGroupBox);
     vLayout->addWidget(selectionGroupBox);
-    vLayout->addWidget(new QLabel(QStringLiteral("Column range")));
-    vLayout->addWidget(axisMinSliderX);
-    vLayout->addWidget(axisMaxSliderX);
-    vLayout->addWidget(new QLabel(QStringLiteral("Row range")));
-    vLayout->addWidget(axisMinSliderZ);
-    vLayout->addWidget(axisMaxSliderZ);
+//    vLayout->addWidget(new QLabel(QStringLiteral("Column range")));
+//    vLayout->addWidget(axisMinSliderX);
+//    vLayout->addWidget(axisMaxSliderX);
+//    vLayout->addWidget(new QLabel(QStringLiteral("Row range")));
+//    vLayout->addWidget(axisMinSliderZ);
+//    vLayout->addWidget(axisMaxSliderZ);
     vLayout->addWidget(new QLabel(QStringLiteral("Theme")));
     vLayout->addWidget(themeList);
     vLayout->addWidget(colorGroupBox);
