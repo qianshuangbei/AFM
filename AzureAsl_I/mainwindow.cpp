@@ -16,8 +16,7 @@
 #include "math.h"
 #include "plotlines.h"
 #include "tool_base.h"
-
-
+#include <stdlib.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -65,7 +64,7 @@ bool MainWindow::LoadDataFile(const QString &fileName, const int index, double *
 
     std::string nanoFileName = fileName.toStdString();
     FILE *nanoFile = fopen(nanoFileName.c_str(), "rb");
-    fseek(nanoFile , _dataManager->dataOffset[0], 0);
+    fseek(nanoFile , _dataManager->dataOffset[0], 0);//指针偏移到数据起始点
     fread( pData, 2, _dataManager->dataLength[index+1]/2 , nanoFile);
     double zScale = _dataManager->dataZScale[index];
     double sScale = _dataManager->dataSScale[index];
@@ -493,4 +492,61 @@ void MainWindow::on_actionThree_Dimension_triggered()
 {
 
 
+}
+
+void MainWindow::on_actionFlatten_triggered()
+{
+
+}
+int compare(const void * a, const void * b)
+ {
+   double da = *(double*)a;
+   double db = *(double*)b;
+   return (da > db) ? 1 : -1;
+ }
+
+void MainWindow::on_actionHistogram_triggered()
+{
+    double** matrix = allChannel.back();
+    int Size = nSize*mSize;
+    double HData[Size];
+    int tempi = 0;
+    for(int ix = 0;ix < mSize; ix++){
+        for(int iy = 0;iy < nSize; iy++){
+            HData[tempi++] = matrix[ix][iy];
+        }
+    }
+    qsort(HData, Size, sizeof(double),compare);//生序排列
+    double Dmax = HData[Size-1];
+    double Dmin = HData[0];
+    double Rx = Dmax - Dmin;//求出极差
+    int Kx = 2 + 3.32*log10(Size); //史特吉斯组数经验公式
+    double hx = Rx / Kx;//求组距
+    double Lu[Kx];
+    double Ld[Kx];
+    Ld[0] = HData[0];
+    for(int i = 0;i < Kx; i++){
+        Lu[i] = Ld[i] + hx;
+        Ld[i+1] = Lu[i];
+    }//求出各组上下限
+    int fnum = 0;//次数统计
+    int knum = 0;//组号
+    double Ksum[Kx];//组数记录
+    int ik = 0;
+    for(int ix = 0; ix < Size; ix++){
+        if(HData[ix] < Lu[knum]) fnum++;
+        else{
+            Ksum[ik++] = fnum;
+            fnum = 1;
+            knum++;
+        }
+    }
+    double fresum[Kx];
+    for(int ix = 0;ix < Kx;ix++) fresum[ix] = Ksum[ix]  / 65536;
+    QFile openDefaultDir("HistogramData.txt");
+    QTextStream in(&openDefaultDir);
+    openDefaultDir.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);
+    knum = 1;
+    for(int ix = 0;ix < Kx;ix++) in <<"The frequency of data "<< knum++<<": "<< fresum[ix]  <<endl;
+    openDefaultDir.close();
 }

@@ -58,6 +58,10 @@ private slots:
 
     void on_actionThree_Dimension_triggered();
 
+    void on_actionFlatten_triggered();
+
+    void on_actionHistogram_triggered();
+
 signals:
     void mousePress(QMouseEvent*);
     void mouseRelease(QMouseEvent*);
