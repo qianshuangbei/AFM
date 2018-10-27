@@ -500,7 +500,9 @@ void MainWindow::on_actionFlatten_triggered()
 }
 int compare(const void * a, const void * b)
  {
-   return ( *(double*)a - *(double*)b );
+   double da = *(double*)a;
+   double db = *(double*)b;
+   return (da > db) ? 1 : -1;
  }
 
 void MainWindow::on_actionHistogram_triggered()
@@ -529,7 +531,7 @@ void MainWindow::on_actionHistogram_triggered()
     }//求出各组上下限
     int fnum = 0;//次数统计
     int knum = 0;//组号
-    int Ksum[Kx];//组数记录
+    double Ksum[Kx];//组数记录
     int ik = 0;
     for(int ix = 0; ix < Size; ix++){
         if(HData[ix] < Lu[knum]) fnum++;
@@ -539,5 +541,12 @@ void MainWindow::on_actionHistogram_triggered()
             knum++;
         }
     }
-
+    double fresum[Kx];
+    for(int ix = 0;ix < Kx;ix++) fresum[ix] = Ksum[ix]  / 65536;
+    QFile openDefaultDir("HistogramData.txt");
+    QTextStream in(&openDefaultDir);
+    openDefaultDir.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);
+    knum = 1;
+    for(int ix = 0;ix < Kx;ix++) in <<"The frequency of data "<< knum++<<": "<< fresum[ix]  <<endl;
+    openDefaultDir.close();
 }
