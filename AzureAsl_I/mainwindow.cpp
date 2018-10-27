@@ -736,6 +736,46 @@ void MainWindow::on_actionHistogram_triggered()
     QTextStream in(&openDefaultDir);
     openDefaultDir.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);
     knum = 1;
-    for(int ix = 0;ix < Kx;ix++) in <<"The frequency of data "<< knum++<<": "<< fresum[ix]  <<endl;
+    for(int ix = 0;ix < Kx;ix++) in <<"The frequency of data's up-limited "<< Lu[ix]<<": "<< fresum[ix]  <<endl;
     openDefaultDir.close();
+    GetHistogram(Lu,fresum,Kx,hx);
+
 }
+void MainWindow::GetHistogram(double *x, double *y, int Kx, double hx)
+{
+    ui->CurveImagePlot->setVisible(true);
+    QVector<double> xn(Kx);
+    QVector<double> yn(Kx);
+
+    for(int ix =0 ;ix < Kx;ix++) {
+        xn[ix] = x[ix];
+        yn[ix] = y[ix];
+    }
+    QCPBars *newBars = new QCPBars(ui->CurveImagePlot->xAxis, ui->CurveImagePlot->yAxis);
+  // ui->CurveImagePlot->setGeometry(700, 50, 700, 400);
+
+    ui->CurveImagePlot->clearGraphs();
+    ui->CurveImagePlot->xAxis->setTickLabels(true);
+    newBars->setData(xn,yn);
+    newBars->setWidth(hx);
+    ui->CurveImagePlot->rescaleAxes(true);
+
+    ui->CurveImagePlot->xAxis->setLabel("the data of height/nm");
+    ui->CurveImagePlot->yAxis->setLabel("probability/%");
+    ui->CurveImagePlot->setBackground(QColor(50,50,50));
+    ui->CurveImagePlot->setInteractions(QCP::iRangeZoom|QCP::iSelectPlottables);
+    ui->CurveImagePlot->setSelectionRectMode(QCP::srmZoom);
+    ui->CurveImagePlot->replot();
+
+}
+
+
+
+
+
+
+    //QCPBars *newBars = new QCPBars(ui->CurveImagePlot->xAxis, ui->CurveImagePlot->yAxis);
+ //   for(int ix =0 ;ix < Kx;ix++) newBars->addData(x[ix],y[ix]);
+   // ui->CurveImagePlot->setVisible(true);
+
+
