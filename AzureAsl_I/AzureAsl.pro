@@ -6,7 +6,6 @@
 
 QT       += core gui
 QT       += opengl
-QT       += widgets
 QT       += datavisualization
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
@@ -14,6 +13,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 TARGET = AzureAsl
 TEMPLATE = app
 
+!include( E:\Qt\Examples\Qt-5.11.1\datavisualization\examples.pri ) {
+    error( "Couldn't find the examples.pri file!" )
+}
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -23,7 +25,8 @@ SOURCES += main.cpp\
     utils.cpp \
     connect/fileconnect.cpp \
     manager/datamanager.cpp \
-    connect/filemodule.cpp
+    connect/filemodule.cpp \
+    surfacegraph.cpp
 
 HEADERS  += mainwindow.h \
     tool_base.h \
@@ -33,7 +36,12 @@ HEADERS  += mainwindow.h \
     utils.h \
     connect/fileconnect.h \
     connect/filemodule.h \
-    manager/datamanager.h
+    manager/datamanager.h \
+    surfacegraph.h
+
+QT       += widgets
+requires(qtConfig(fontcombobox))
+requires(qtConfig(combobox))
 
 FORMS    += mainwindow.ui \
     loginui.ui

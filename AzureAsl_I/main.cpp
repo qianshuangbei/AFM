@@ -15,11 +15,12 @@ int main(int argc, char *argv[])
     LoginUI loginexe;
     QPalette mainwindow_color;
 
+    /*
     QFile qss(":/Qss/white.qss");
     qss.open(QFile::ReadOnly);
     a.setStyleSheet(qss.readAll());
     qss.close();
-
+*/
     mainwindow_color.setColor(QPalette::Background, Qt::black);
     loginexe.setWindowOpacity(1);
     loginexe.setWindowFlags(Qt::FramelessWindowHint);
