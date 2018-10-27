@@ -5,6 +5,7 @@
 #include <QVector>
 #include "qcustomplot.h"
 #include "manager/datamanager.h"
+#include "surfacegraph.h"
 
 
 class QPushButton;
@@ -22,7 +23,6 @@ enum Rp_Analysis{
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
