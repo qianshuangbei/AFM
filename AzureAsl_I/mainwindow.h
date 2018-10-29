@@ -50,13 +50,12 @@ private slots:
     void on_actionSection_triggered();
     void on_actionRoughness_triggered();
     void on_actionPower_Spectral_Denstiy_triggered();
-
+    void on_actionDouble_Channel_triggered();
+    void on_actionThree_Dimension_triggered();
+    void on_actionViewer_triggered();
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
-    void on_actionDouble_Channel_triggered();
-
-    void on_actionThree_Dimension_triggered();
 
 signals:
     void mousePress(QMouseEvent*);
@@ -65,6 +64,8 @@ signals:
 
 
 private:
+    void viewerMode();
+
     QString _fileName;
     Ui::MainWindow *ui;
     QPointF _pos00;
@@ -75,7 +76,7 @@ private:
     QLabel *_mouseMoveLabel;
     QCPColorMap* _doubleColorMap;
     QVector<QVector<int>> _pastSize;
-
+    QCPColorScale *colorScale;
     bool _pressRelease ;
     bool _mouseActive;
     bool _isDoubleChannel;
