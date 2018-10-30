@@ -40,7 +40,7 @@ private slots:
 
 private:
     Ui::LoginUI *ui;
-    QPainter *_painter;
+
     QVector<codeParam*> _codevct;
     int _xTime;
     int _timeStamp;

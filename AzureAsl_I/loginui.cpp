@@ -47,7 +47,7 @@ void LoginUI::on_Loginbtn_clicked()
 
 void LoginUI::paintEvent(QPaintEvent *event){
     Q_UNUSED(event);
-    _painter = new QPainter(this);
+    QPainter *_painter = new QPainter(this);
     _painter->setPen(QColor(69,139,0));
     QFont font("Microsoft YaHei", 12);
     _painter->setFont(font);
@@ -61,14 +61,10 @@ void LoginUI::paintEvent(QPaintEvent *event){
         _codevct[i]->codeYval-=_codevct[i]->codeSpeed;
         _painter->drawText(_codevct[i]->codeYval,_codevct[i]->codePosition, _codevct[i]->code);
     }
-
-
 }
 void LoginUI::timerEvent(QTimerEvent *event){
-    if(_timeStamp++> 50) accept();;
+    if(_timeStamp++> 50) accept();
     if(event->timerId()== _xTime){
         repaint();
     }
-
-
 }

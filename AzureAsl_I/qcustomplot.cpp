@@ -13000,10 +13000,10 @@ void QCustomPlot::setSelectionRectMode(QCP::SelectionRectMode mode)
       connect(mSelectionRect, SIGNAL(accepted(QRect,QMouseEvent*)), this, SLOT(processRectSelection(QRect,QMouseEvent*)));
     else if (mode == QCP::srmZoom)
       connect(mSelectionRect, SIGNAL(accepted(QRect,QMouseEvent*)), this, SLOT(processRectZoom(QRect,QMouseEvent*)));
-    else if (mSelectionRectMode == QCP::srmRaphRect)
-      connect(mSelectionRect,SIGNAL(accepted(QRect,QMouseEvent*)), this, SLOT(processRaphRectSelection(QRect rect,QMouseEvent*)));
-    else if (mSelectionRectMode == QCP::srmRaphLine)
-      connect(mSelectionRect,SIGNAL(accepted(QRect,QMouseEvent*)), this, SLOT(processRaphLineSelection(QRect rect,QMouseEvent*)));
+    else if (mode == QCP::srmRaphRect)
+    ;//  connect(mSelectionRect,SIGNAL(accepted(QRect,QMouseEvent*)), this, SLOT(processRaphRectSelection(QRect rect,QMouseEvent*)));
+    else if (mode == QCP::srmRaphLine)
+    ;//  connect(mSelectionRect,SIGNAL(accepted(QRect,QMouseEvent*)), this, SLOT(processRaphLineSelection(QRect rect,QMouseEvent*)));
 
   }
   

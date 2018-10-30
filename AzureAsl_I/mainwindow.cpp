@@ -61,7 +61,23 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->CurveImagePlot->setVisible(false);
     ui->TwoDImageIIPlot->setVisible(false);
     ui->CurveImageIIPlot->setVisible(false);
+    ui->CurveImagePlot->plotLayout()->insertRow(0);
+    ui->CurveImagePlot->plotLayout()->addElement(0,0, new QCPTextElement(ui->CurveImagePlot, "2D plot"));
     ui->newtable->setGeometry(-1,-1,-1,-1);
+    _mouseStartLabel = new QLabel();
+    _mouseStartLabel->setText("");
+    _mouseStartLabel->setFixedWidth(300);
+    statusBar()->addPermanentWidget(_mouseStartLabel);
+
+    _mouseEndLabel = new QLabel();
+    _mouseEndLabel->setText("");
+    _mouseEndLabel->setFixedWidth(300);
+    statusBar()->addPermanentWidget(_mouseEndLabel);
+
+    _mouseMoveLabel = new QLabel();
+    _mouseMoveLabel->setText("");
+    _mouseMoveLabel->setFixedWidth(300);
+    statusBar()->addPermanentWidget(_mouseMoveLabel);
 }
 
 MainWindow::~MainWindow()
@@ -116,7 +132,17 @@ void MainWindow::on_actionOpen_triggered()
     if(!_fileName.isEmpty()){
 
         _dataManager = DataManager::Instance();
-        _dataManager->LoadRowFile(_fileName);
+        if(!_dataManager->LoadRowFile(_fileName)){
+            QMessageBox *msgBox;
+            msgBox = new QMessageBox("Surprise!!!!!",
+                                     "Hey, This's not common AFM image",
+                                     QMessageBox::Critical,
+                                     QMessageBox::Ok | QMessageBox::Default,
+                                     QMessageBox::Cancel | QMessageBox::Escape,
+                                     0);
+            msgBox->show();
+            return;
+        }
 
         mSize = _dataManager->ySize;
         nSize = _dataManager->xSize;
@@ -129,8 +155,10 @@ void MainWindow::on_actionOpen_triggered()
 
         int index= 0 ;
         for(i = 0; i < _dataManager->type.size(); i++){
-            if(_dataManager->type[i] == "Height") {
+            if(_dataManager->type[i] == "Height" ||
+               _dataManager->type[i] == "Height Sensor") {
                 index = i;
+                break;
             }
         }
         if(!allChannel.size()){
@@ -163,7 +191,7 @@ void MainWindow::on_actionOpen_triggered()
 
         GenerateMain2DImage();
         GenerateInformation();
-
+        viewerMode();
     }
 }
 
@@ -205,41 +233,17 @@ void MainWindow:: paintEvent(QPaintEvent *)
 }
 
 void MainWindow::InitAfterFile(){
-
-
-
-    /*
-     * 状态栏
-    */
-
-    _mouseStartLabel = new QLabel();
-    _mouseStartLabel->setText("");
-    _mouseStartLabel->setFixedWidth(300);
-    statusBar()->addPermanentWidget(_mouseStartLabel);
-
-    _mouseEndLabel = new QLabel();
-    _mouseEndLabel->setText("");
-    _mouseEndLabel->setFixedWidth(300);
-    statusBar()->addPermanentWidget(_mouseEndLabel);
-
-    _mouseMoveLabel = new QLabel();
-    _mouseMoveLabel->setText("");
-    _mouseMoveLabel->setFixedWidth(300);
-    statusBar()->addPermanentWidget(_mouseMoveLabel);
-
-
-    _mouseActive = true;
     ui->TwoDImagePlot->setMouseTracking(true);
-
 }
 
 
 void MainWindow::GenerateMain2DImage(){
-
+    if(ui->TwoDImagePlot->plotLayout()->hasElement(0,1)){
+        ui->TwoDImagePlot->plotLayout()->removeAt(1);
+    }
     ui->TwoDImagePlot->setVisible(true);
-    //    ui->TwoDImagePlot->plotLayout()->clear();
-    //    ui->TwoDImagePlot->plotLayout()->simplify();
-
+    if(ui->TwoDImagePlot->plottableCount() != 0)
+        ui->TwoDImagePlot->clearPlottables();
     unsigned int writePart = (nSize- mSize)/(double)nSize*256;
     xOffset = 10;
     yOffset = 40 + writePart;
@@ -249,7 +253,6 @@ void MainWindow::GenerateMain2DImage(){
     ui->TwoDImagePlot->xAxis->setLabel("Height Sensor");
     ui->TwoDImagePlot->yAxis->setTicks(true);
     ui->TwoDImagePlot->yAxis->setTickLabels(true);
-
     QCPColorMap *colorMap = new QCPColorMap(ui->TwoDImagePlot->xAxis, ui->TwoDImagePlot->yAxis);
     colorMap->data()->clear();
     colorMap->data()->setSize(nSize, mSize);
@@ -261,18 +264,18 @@ void MainWindow::GenerateMain2DImage(){
       }
     }
     // add a color scale:
-    QCPColorScale *colorScale = new QCPColorScale(ui->TwoDImagePlot);
+    colorScale = new QCPColorScale(ui->TwoDImagePlot);
     ui->TwoDImagePlot->plotLayout()->addElement(0,1, colorScale);
-    colorScale->setType(QCPAxis::atRight);
+
     colorMap->setColorScale(colorScale);
-    colorScale->axis()->setLabel("nm");
     colorMap->setGradient(QCPColorGradient::gpPolar);
     colorMap->rescaleDataRange();
 
     QCPMarginGroup *marginGroup = new QCPMarginGroup(ui->TwoDImagePlot);
     ui->TwoDImagePlot->axisRect()->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
     colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
-    ui->TwoDImagePlot->rescaleAxes();
+    ui->TwoDImagePlot->xAxis->setRange(0, nSize);
+    ui->TwoDImagePlot->yAxis->setRange(0, mSize);
     ui->TwoDImagePlot->replot();
 
     _pos00 = colorMap->coordsToPixels(0,0);
@@ -281,17 +284,12 @@ void MainWindow::GenerateMain2DImage(){
     // add user Interactions
     ui->TwoDImagePlot->setInteractions(QCP::iSelectPlottables);
     ui->TwoDImagePlot->setSelectionRectMode(QCP::srmRaphRect);
-    ui->TwoDImagePlot->selectionRect()->setPen(QPen(Qt::red));
-
-    connect(ui->TwoDImagePlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent *)));
-    connect(ui->TwoDImagePlot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
-    connect(ui->TwoDImagePlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
+    ui->TwoDImagePlot->selectionRect()->setPen(QPen(Qt::white));
 
     ui->TwoDImagePlot->replot();
 }
 
 void MainWindow::GenerateInformation(){
-
 
       ui->newtable->setGeometry(10,650,670,200);
       QStringList header;
@@ -328,7 +326,12 @@ void MainWindow::GenerateInformation(){
 
 void MainWindow::on_actionSection_triggered()
 {
+    _mouseActive = true;
     ui->TwoDImagePlot->setSelectionRectMode(QCP::srmRaphLine);
+    curPoint=lastPoint;
+    ui->TwoDImagePlot->replot();
+    if(_pressRelease)
+        update();
     ui->CurveImagePlot->setGeometry(700, 50, 700, 400);
     ui->CurveImagePlot->clearGraphs();
     ui->CurveImagePlot->replot();
@@ -336,8 +339,18 @@ void MainWindow::on_actionSection_triggered()
     ui->CurveImagePlot->xAxis2->setTickLabels(false);
     ui->CurveImagePlot->yAxis2->setVisible(true);
     ui->CurveImagePlot->yAxis2->setTickLabels(false);
-    ui->CurveImagePlot->setInteractions( QCP::iRangeZoom | QCP::iSelectPlottables| QCP::iRangeDrag);
-     ui->CurveImagePlot->setVisible(true);
+    ui->CurveImagePlot->setInteractions( QCP::iRangeZoom | QCP::iSelectPlottables);
+    ui->CurveImagePlot->setSelectionRectMode(QCP::srmZoom);
+    ui->CurveImagePlot->xAxis->setLabel("Distance (pixel)");
+    ui->CurveImagePlot->yAxis->setLabel("Height (nm)");
+    ui->CurveImagePlot->legend->setVisible(false);
+
+
+
+    connect(ui->TwoDImagePlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent *)));
+    connect(ui->TwoDImagePlot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
+    connect(ui->TwoDImagePlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
+
     if(_isDoubleChannel){
         ui->CurveImageIIPlot->setGeometry(700, 450, 700, 400);
         ui->CurveImageIIPlot->xAxis2->setVisible(true);
@@ -360,14 +373,14 @@ void MainWindow::SectionAddData(int x1, int y1, int x2, int y2){
     crossLine->ySize = mSize;
     crossLine->xSize = nSize;
 
-
+    ui->CurveImagePlot->setVisible(true);
     QVector<QVector<double> > poLine;
     poLine= crossLine->ToolCrossLine(allChannel.back(), x1, y1, x2, y2);
     ui->CurveImagePlot->addGraph();
     ui->CurveImagePlot->graph(0)->setPen(QPen(Qt::blue));
     ui->CurveImagePlot->graph(0)->setBrush(QBrush(QColor(0, 0, 255, 20)));
     ui->CurveImagePlot->graph(0)->setData(poLine[0], poLine[1]);
-    ui->CurveImagePlot->graph(0)->rescaleAxes(true);
+    ui->CurveImagePlot->graph(0)->rescaleAxes();
     ui->CurveImagePlot->replot();
 
     if(_isDoubleChannel){
@@ -394,8 +407,6 @@ void MainWindow::SectionAddData(int x1, int y1, int x2, int y2){
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event){
-    if(!_mouseActive)
-        return;
     QString str = "(" + QString::number(event->x()) + "," + QString::number(event->y()) + ")";
     lastPoint= event->pos();
     _mouseStartLabel->setText("Mouse Start Position:"+str);
@@ -403,18 +414,16 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
 }
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *event){
-    if(!_mouseActive)
-        return;
      QString str = "(" + QString::number(event->x()) + ","+QString::number(event->y()) + ")";
-     endPoint= event->pos();
+     endPoint= event->pos();     
      _mouseEndLabel->setText("Mouse End Position:"+str);
-     SectionAddData(lastPoint.x() , lastPoint.y(), endPoint.x(), endPoint.y());
+     if(_mouseActive){
+        SectionAddData(lastPoint.x() , lastPoint.y(), endPoint.x(), endPoint.y());
+     }
      _pressRelease = false;
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event){
-    if(!_mouseActive)
-        return;
     QString str = "(" + QString::number(event->x()) + "," + QString::number(event->y()) + ")";
     _mouseMoveLabel->setText("Mouse Current Postion:"+str);
     curPoint=event->pos();
@@ -425,20 +434,20 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event){
 
 void MainWindow::on_actionRoughness_triggered()
 {
-
+    viewerMode();
 }
 
 void MainWindow::on_actionPower_Spectral_Denstiy_triggered()
 {
+    viewerMode();
     ui->CurveImagePlot->setGeometry(700, 50, 700, 400);
-
     ToolBase *psd = new ToolBase();
     psd->xSize= nSize;
     psd->ySize= mSize;
     psd->xScale=_dataManager->dataSScale[0];
     QVector<QVector<double> >psdResH = psd->ToolHPowerSpectralDensity(allChannel.back());
     QVector<QVector<double> >psdResV = psd->ToolVPowerSpectralDensity(allChannel.back());
-
+    ui->CurveImagePlot->setVisible(true);
     ui->CurveImagePlot->clearGraphs();
     ui->CurveImagePlot->replot();
     ui->CurveImagePlot->addGraph();
@@ -453,12 +462,11 @@ void MainWindow::on_actionPower_Spectral_Denstiy_triggered()
     ui->CurveImagePlot->graph(1)->setBrush(QBrush(QColor(0, 0, 255, 20)));
     ui->CurveImagePlot->graph(1)->setData(psdResV[0], psdResV[1]);
     ui->CurveImagePlot->graph(1)->setName("Y Orientation");
-    ui->CurveImagePlot->graph(0)->rescaleAxes(true);
-    ui->CurveImagePlot->graph(1)->rescaleAxes(true);
-
+    ui->CurveImagePlot->graph(0)->rescaleAxes();
+    ui->CurveImagePlot->graph(1)->rescaleAxes();
+    ui->CurveImagePlot->legend->setVisible(true);
     ui->CurveImagePlot->xAxis->setLabel("Normalized X&Y Frequency(log nm^-1)");
     ui->CurveImagePlot->yAxis->setLabel("psd(log nm3)");
-
     ui->CurveImagePlot->setInteractions(QCP::iRangeZoom|QCP::iSelectPlottables);
     ui->CurveImagePlot->setSelectionRectMode(QCP::srmZoom);
     ui->CurveImagePlot->selectionRect()->setPen(QPen(Qt::red));
@@ -497,12 +505,14 @@ void MainWindow::on_actionDouble_Channel_triggered()
     ui->TwoDImageIIPlot->rescaleAxes();
     ui->TwoDImageIIPlot->replot();
 
-    _isDoubleChannel = true;
+    // _isDoubleChannel = true;
+    _isDoubleChannel = false; // disable this function tmply
 }
 
 void MainWindow::on_actionThree_Dimension_triggered()
 {
     // example : http://doc.qt.io/qt-5/qtdatavisualization-surface-example.html
+    viewerMode();
     Q3DSurface *graph = new Q3DSurface();
     QWidget *container = QWidget::createWindowContainer(graph);
     //! [0]
@@ -679,4 +689,25 @@ void MainWindow::on_actionThree_Dimension_triggered()
     modeItemRB->setChecked(true);
     themeList->setCurrentIndex(2);
 
+}
+
+void MainWindow::on_actionViewer_triggered()
+{
+    viewerMode();
+}
+
+void MainWindow::viewerMode(){
+    disconnect(ui->TwoDImagePlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent *)));
+    disconnect(ui->TwoDImagePlot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
+    disconnect(ui->TwoDImagePlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
+    ui->CurveImagePlot->setVisible(false);
+    ui->TwoDImagePlot->setSelectionRectMode(QCP::srmRaphRect);
+    ui->TwoDImagePlot->selectionRect()->setPen(QPen(Qt::white));
+    curPoint=lastPoint;
+    _mouseActive = false;
+    ui->TwoDImagePlot->replot();
+    if(_pressRelease)
+        update();
+//    _mouseActive = false;
+//    ui->TwoDImagePlot->setMouseTracking(false);
 }
