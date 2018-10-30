@@ -132,7 +132,17 @@ void MainWindow::on_actionOpen_triggered()
     if(!_fileName.isEmpty()){
 
         _dataManager = DataManager::Instance();
-        _dataManager->LoadRowFile(_fileName);
+        if(!_dataManager->LoadRowFile(_fileName)){
+            QMessageBox *msgBox;
+            msgBox = new QMessageBox("Surprise!!!!!",
+                                     "Hey, This's not common AFM image",
+                                     QMessageBox::Critical,
+                                     QMessageBox::Ok | QMessageBox::Default,
+                                     QMessageBox::Cancel | QMessageBox::Escape,
+                                     0);
+            msgBox->show();
+            return;
+        }
 
         mSize = _dataManager->ySize;
         nSize = _dataManager->xSize;
@@ -145,8 +155,10 @@ void MainWindow::on_actionOpen_triggered()
 
         int index= 0 ;
         for(i = 0; i < _dataManager->type.size(); i++){
-            if(_dataManager->type[i] == "Height") {
+            if(_dataManager->type[i] == "Height" ||
+               _dataManager->type[i] == "Height Sensor") {
                 index = i;
+                break;
             }
         }
         if(!allChannel.size()){
@@ -228,7 +240,6 @@ void MainWindow::InitAfterFile(){
 void MainWindow::GenerateMain2DImage(){
     if(ui->TwoDImagePlot->plotLayout()->hasElement(0,1)){
         ui->TwoDImagePlot->plotLayout()->removeAt(1);
-        printf("simplify");
     }
     ui->TwoDImagePlot->setVisible(true);
     if(ui->TwoDImagePlot->plottableCount() != 0)

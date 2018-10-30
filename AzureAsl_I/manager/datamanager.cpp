@@ -28,13 +28,12 @@ bool DataManager::LoadRowFile(const QString &fileName){
     }
     QTextStream out(&file);
     curLine = out.readLine();
-    if (!curLine.contains("File list")) {
+    if (!curLine.contains("\*File list")) {
         std::cout<< "ERROR: AFM Head error";
         return false;
     }
     do{
         curLine = out.readLine();
-
         if(curLine.contains("Description",Qt::CaseInsensitive)){
             curLine.remove(0,14);
             _instance->description = curLine;
@@ -132,6 +131,6 @@ bool DataManager::LoadRowFile(const QString &fileName){
 
     }
     while(!curLine.contains("*File list end"));
-    return false;
+    return true;
 }
 
