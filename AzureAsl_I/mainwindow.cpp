@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _mouseActive = false;
     _isDoubleChannel= false;
 /*
- * 偏置
+ * *偏置
 */
     yOffset = 0;
     xOffset = 0;
