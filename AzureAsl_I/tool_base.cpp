@@ -1,5 +1,5 @@
 #include "tool_base.h"
-
+#include <algorithm>
 
 ToolBase::ToolBase()
 {
@@ -88,4 +88,53 @@ QVector<QVector<double> >ToolBase::ToolVPowerSpectralDensity(double **matrix){
     for(int i=0; i<ySize/2; i++) res[1][i] /= xSize;
     fftw_free(out);
     return res;
+}
+double *ToolBase::Historgram(double **matrix, int mSize,int nSize)
+{
+    int Size = nSize*mSize;
+    double HData[Size];
+    int tempi = 0;
+    for(int ix = 0;ix < mSize; ix++){
+        for(int iy = 0;iy < nSize; iy++){
+            HData[tempi++] = matrix[ix][iy];
+        }
+    }
+    qSort(HData,HData+Size);
+  //  qsort(HData, Size, sizeof(double),compare);//生序排列
+    double Dmax = HData[Size-1];
+    double Dmin = HData[0];
+    double Rx = Dmax - Dmin;//求出极差
+    int Kx = 2 + 3.32*log10(Size); //史特吉斯组数经验公式
+    double hx = Rx / Kx;//求组距
+    double Lu[Kx];
+    double Ld[Kx];
+    Ld[0] = HData[0];
+    for(int i = 0;i < Kx; i++){
+        Lu[i] = Ld[i] + hx;
+        Ld[i+1] = Lu[i];
+    }//求出各组上下限
+    int fnum = 0;//次数统计
+    int knum = 0;//组号
+    double Ksum[Kx];//组数记录
+    int ik = 0;
+    for(int ix = 0; ix < Size; ix++){
+        if(HData[ix] < Lu[knum]) fnum++;
+        else{
+            Ksum[ik++] = fnum;
+            fnum = 1;
+            knum++;
+        }
+    }
+    double *fresum = new double[2*Kx+1];
+    for(int ix = 1;ix <= Kx;ix++) fresum[ix+Kx] = Ksum[ix-1]  / 65536 * 100;
+    fresum[0] = Kx;
+    for(int ix = 1;ix <= Kx;ix++) fresum[ix] = Lu[ix-1];
+    QFile openDefaultDir("HistogramData.txt");
+    QTextStream in(&openDefaultDir);
+    openDefaultDir.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);
+    knum = 1;
+    for(int ix = 1;ix <= Kx;ix++) in <<"The frequency of data's up-limited "<< Lu[ix-1]<<": "<< fresum[ix+Kx]  <<endl;
+    openDefaultDir.close();
+    return fresum;//fresum[0]为组数 从[1]-[Kx]开始为频率信息 [Kx+1]-[2*Kx+1]
+
 }

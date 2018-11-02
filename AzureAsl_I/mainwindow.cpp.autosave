@@ -724,12 +724,14 @@ void MainWindow::on_actionHistogram_triggered()
     //
     QBarSet *set0 = new QBarSet("高度信息");
     for(int ix = 1;ix <= groupnum;ix++) *set0 << fredata[ix];
+    set0->borderWidth()
     QBarSeries *series = new QBarSeries();
     series->append(set0);
     QChart *chart = new QChart();
     chart->addSeries(series);
     chart->setTitle("频率分布直方图");
     chart->setAnimationOptions(QChart::SeriesAnimations);
+    
     QStringList categories;
     for(int ix = 1;ix <= groupnum;ix++) categories << slimit.setNum(limit[ix],'g',2);
     QBarCategoryAxis *axis = new QBarCategoryAxis();
