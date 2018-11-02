@@ -111,7 +111,6 @@
     <property name="title">
      <string>Analysis</string>
     </property>
-    <addaction name="actionViewer"/>
     <addaction name="actionSection"/>
     <addaction name="actionRoughness"/>
     <addaction name="actionPower_Spectral_Denstiy"/>
@@ -211,11 +210,6 @@
   <action name="actionThree_Dimension">
    <property name="text">
     <string>Three Dimension</string>
-   </property>
-  </action>
-  <action name="actionViewer">
-   <property name="text">
-    <string>Viewer</string>
    </property>
   </action>
   <action name="actionHistogram">

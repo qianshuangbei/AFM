@@ -48,9 +48,9 @@ FORMS    += mainwindow.ui \
 
 RC_ICONS =desk.ico\
 
-LIBS += ..\AzureAsl_I\fftw-3.3.4-dll32\libfftw3-3.dll
-INCLUDEPATH += ..\AzureAsl_I\fftw-3.3.4-dll32
-DEPENDPATH += ..\AzureAsl_I\fftw-3.3.4-dll32
+LIBS += E:\QTCode\fftw-3.3.4-dll32\libfftw3-3.dll
+INCLUDEPATH += E:\QTCode\fftw-3.3.4-dll32
+DEPENDPATH += E:\QTCode\fftw-3.3.4-dll32
 
 
 

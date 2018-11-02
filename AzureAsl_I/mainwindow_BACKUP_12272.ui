@@ -213,14 +213,15 @@
     <string>Three Dimension</string>
    </property>
   </action>
-  <action name="actionViewer">
-   <property name="text">
-    <string>Viewer</string>
-   </property>
-  </action>
+<<<<<<< HEAD
   <action name="actionHistogram">
    <property name="text">
     <string>Histogram</string>
+=======
+  <action name="actionViewer">
+   <property name="text">
+    <string>Viewer</string>
+>>>>>>> 23702ea79dd167952330f7dd301fbaaaf4c821c6
    </property>
   </action>
  </widget>

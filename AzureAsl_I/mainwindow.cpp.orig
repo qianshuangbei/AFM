@@ -693,6 +693,7 @@ void MainWindow::on_actionThree_Dimension_triggered()
 
 }
 
+<<<<<<< HEAD
 void MainWindow::on_actionFlatten_triggered()
 {
 
@@ -789,7 +790,7 @@ void MainWindow::GetHistogram(double *x, double *y, int Kx, double hx)
    // ui->CurveImagePlot->setVisible(true);
 
 
-
+=======
 void MainWindow::on_actionViewer_triggered()
 {
     viewerMode();
@@ -810,4 +811,4 @@ void MainWindow::viewerMode(){
 //    _mouseActive = false;
 //    ui->TwoDImagePlot->setMouseTracking(false);
 }
-
+>>>>>>> 23702ea79dd167952330f7dd301fbaaaf4c821c6

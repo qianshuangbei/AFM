@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.6.2, 2018-11-02T14:01:55. -->
+<<<<<<< HEAD
+<!-- Written by QtCreator 4.6.2, 2018-10-27T21:02:58. -->
+=======
+<!-- Written by QtCreator 4.6.1, 2018-10-30T10:54:52. -->
+>>>>>>> 23702ea79dd167952330f7dd301fbaaaf4c821c6
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -285,8 +289,8 @@
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">AzureAsl</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">AzureAsl2</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:E:/QTCode/NInth/AFM/AzureAsl_I/AzureAsl.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:E:/QTCode/AFM/AzureAsl_I/AzureAsl.pro</value>
     <value type="bool" key="QmakeProjectManager.QmakeRunConfiguration.UseLibrarySearchPath">true</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments"></value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">AzureAsl.pro</value>
