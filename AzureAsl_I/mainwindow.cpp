@@ -72,6 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->CurveImagePlot->setVisible(false);
     ui->TwoDImageIIPlot->setVisible(false);
     ui->CurveImageIIPlot->setVisible(false);
+    ui->Historgram->setVisible(false);
     ui->CurveImagePlot->plotLayout()->insertRow(0);
     ui->CurveImagePlot->plotLayout()->addElement(0,0, new QCPTextElement(ui->CurveImagePlot, "2D plot"));
     ui->newtable->setGeometry(-1,-1,-1,-1);
@@ -708,78 +709,36 @@ void MainWindow::on_actionFlatten_triggered()
 }
 void MainWindow::on_actionHistogram_triggered()
 {
-    double** matrix = allChannel.back();
-
-    ToolBase histogram;
-    double *information;
-    information = histogram.Historgram(matrix,mSize,nSize);
-    int groupnum;
-    groupnum = (int)information[0];
-    double limit[groupnum];
-    for(int ix = 1;ix <= groupnum;ix++) limit[ix] = information[ix];
+    ToolBase *psd = new ToolBase();
+    psd->xSize= nSize;
+    psd->ySize= mSize;
+    QVector<QVector<double>> psdRes = psd->Historgram(allChannel.back());
+    int groupNum = psdRes[1].size();
     QString slimit;
-    double fredata[groupnum];
-    for(int ix = 1;ix <= groupnum;ix++)  fredata[ix] = information[ix+groupnum];
-    //GetHistogram(Lu,fresum,Kx,hx);
-    //
-    QBarSet *set0 = new QBarSet("高度信息");
-    for(int ix = 1;ix <= groupnum;ix++) *set0 << fredata[ix];
+    QBarSet *set0 = new QBarSet("hight information");
+    for(int ix = 0;ix < groupNum;ix++) *set0 << psdRes[1][ix];
     QBarSeries *series = new QBarSeries();
     series->append(set0);
     QChart *chart = new QChart();
     chart->addSeries(series);
-    chart->setTitle("频率分布直方图");
+    chart->setTitle("Histogram");
     chart->setAnimationOptions(QChart::SeriesAnimations);
+    
     QStringList categories;
-    for(int ix = 1;ix <= groupnum;ix++) categories << slimit.setNum(limit[ix],'g',2);
+    for(int ix = 0;ix < groupNum;ix++) categories << slimit.setNum(psdRes[0][ix],'g',3);
     QBarCategoryAxis *axis = new QBarCategoryAxis();
     axis->append(categories);
     chart->createDefaultAxes();
     chart->setAxisX(axis, series);
     chart->legend()->setVisible(true);
     chart->legend()->setAlignment(Qt::AlignBottom);
-    ui ->Historgram -> setChart(chart);
-    ui ->Historgram->setRenderHint(QPainter::Antialiasing);
+    ui->Historgram->setVisible(true);
+    ui->Historgram->setChart(chart);
+    ui->Historgram->setRenderHint(QPainter::Antialiasing);
+    /*
+     xAxis shows the lowerlimit of the data.  x[i] <= data[i] < x[i+1]
+     */
 }
-/*
-void MainWindow::GetHistogram(double *x, double *y, int Kx, double hx)
-{
-    ui->CurveImagePlot->setVisible(true);
-    QVector<double> xn(Kx);
-    QVector<double> yn(Kx);
-
-    for(int ix =0 ;ix < Kx;ix++) {
-        xn[ix] = x[ix];
-        yn[ix] = y[ix];
-    }
-    QCPBars *newBars = new QCPBars(ui->CurveImagePlot->xAxis, ui->CurveImagePlot->yAxis);
-  // ui->CurveImagePlot->setGeometry(700, 50, 700, 400);
-
-    ui->CurveImagePlot->clearGraphs();
-    ui->CurveImagePlot->xAxis->setTickLabels(true);
-    newBars->setData(xn,yn);
-    newBars->setWidth(hx);
-    ui->CurveImagePlot->rescaleAxes(true);
-
-    ui->CurveImagePlot->xAxis->setLabel("the data of height/nm");
-    ui->CurveImagePlot->yAxis->setLabel("probability/%");
-    ui->CurveImagePlot->setBackground(QColor(50,50,50));
-    ui->CurveImagePlot->setInteractions(QCP::iRangeZoom|QCP::iSelectPlottables);
-    ui->CurveImagePlot->setSelectionRectMode(QCP::srmZoom);
-    ui->CurveImagePlot->replot();
-
-}
-
-*/
-
-
-
-
-    //QCPBars *newBars = new QCPBars(ui->CurveImagePlot->xAxis, ui->CurveImagePlot->yAxis);
- //   for(int ix =0 ;ix < Kx;ix++) newBars->addData(x[ix],y[ix]);
-   // ui->CurveImagePlot->setVisible(true);
-
-
 
 void MainWindow::on_actionViewer_triggered()
 {
@@ -791,6 +750,7 @@ void MainWindow::viewerMode(){
     disconnect(ui->TwoDImagePlot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
     disconnect(ui->TwoDImagePlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
     ui->CurveImagePlot->setVisible(false);
+    ui->Historgram->setVisible(false);
     ui->TwoDImagePlot->setSelectionRectMode(QCP::srmRaphRect);
     ui->TwoDImagePlot->selectionRect()->setPen(QPen(Qt::white));
     curPoint=lastPoint;

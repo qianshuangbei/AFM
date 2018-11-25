@@ -39,7 +39,6 @@ public:
     QPoint endPoint;
     QPoint curPoint;
 public:
-    void GetHistogram(double *x,double *y,int Kx,double hx);
     void GenerateInformation();
     bool LoadDataFile(const QString &fileName, const int index, double ** matrix);
     void SectionAddData(int x1, int y1, int x2, int y2);

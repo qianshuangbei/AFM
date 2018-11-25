@@ -18,7 +18,7 @@ public:
 
 
 public:
-    double *Historgram(double** matrix,int mSize,int nSize);
+    QVector<QVector<double> > Historgram(double** matrix);
     explicit ToolBase();
     QVector<QVector<double> > ToolCrossLine(double **matrix, int lastX, int lastY, int endX, int endY);
     QVector<QVector<double> > ToolHPowerSpectralDensity(double **matrix);

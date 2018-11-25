@@ -89,52 +89,45 @@ QVector<QVector<double> >ToolBase::ToolVPowerSpectralDensity(double **matrix){
     fftw_free(out);
     return res;
 }
-double *ToolBase::Historgram(double **matrix, int mSize,int nSize)
+QVector<QVector<double> > ToolBase::Historgram(double **matrix)
 {
-    int Size = nSize*mSize;
-    double HData[Size];
-    int tempi = 0;
-    for(int ix = 0;ix < mSize; ix++){
-        for(int iy = 0;iy < nSize; iy++){
-            HData[tempi++] = matrix[ix][iy];
+    double dataMax = matrix[0][0];
+    double dataMin = matrix[0][0];
+    for(int i = 0;i < ySize;i++){
+        for(int j = 0;j < xSize;j++){
+           double temp;
+           temp = matrix[i][j];
+           if(temp > dataMax) dataMax = temp;
+           if(temp < dataMin) dataMin = temp;
         }
     }
-    qSort(HData,HData+Size);
-  //  qsort(HData, Size, sizeof(double),compare);//生序排列
-    double Dmax = HData[Size-1];
-    double Dmin = HData[0];
-    double Rx = Dmax - Dmin;//求出极差
-    int Kx = 2 + 3.32*log10(Size); //史特吉斯组数经验公式
-    double hx = Rx / Kx;//求组距
-    double Lu[Kx];
-    double Ld[Kx];
-    Ld[0] = HData[0];
-    for(int i = 0;i < Kx; i++){
-        Lu[i] = Ld[i] + hx;
-        Ld[i+1] = Lu[i];
-    }//求出各组上下限
-    int fnum = 0;//次数统计
-    int knum = 0;//组号
-    double Ksum[Kx];//组数记录
-    int ik = 0;
-    for(int ix = 0; ix < Size; ix++){
-        if(HData[ix] < Lu[knum]) fnum++;
-        else{
-            Ksum[ik++] = fnum;
-            fnum = 1;
-            knum++;
+    double dataRange = dataMax - dataMin;//get the range
+    int groupNum = 2 + 3.32*log10(xSize*ySize); //Sturges empirical formula
+    double groupDistance = dataRange / groupNum;
+    QVector<QVector<double>> res(2,QVector<double>(groupNum));
+    res[0][0]= dataMin;
+    for(int i = 0;i < groupNum - 1; i++){
+        res[0][i+1] = res[0][i] + groupDistance;
+    }
+    QVector<double> dataFrequency(groupNum,0);
+    for(int i = 0;i < ySize;i++){
+        for(int j = 0;j < xSize;j++){
+            for(int ix = 1;ix < groupNum;ix++){
+                if(matrix[i][j] < res[0][ix]){
+                    dataFrequency[ix-1]++;
+                    break;
+                }
+            }
         }
     }
-    double *fresum = new double[2*Kx+1];
-    for(int ix = 1;ix <= Kx;ix++) fresum[ix+Kx] = Ksum[ix-1]  / 65536 * 100;
-    fresum[0] = Kx;
-    for(int ix = 1;ix <= Kx;ix++) fresum[ix] = Lu[ix-1];
+    for(int ix = 0;ix < groupNum;ix++) {
+        res[1][ix] = dataFrequency[ix] * 100 / (xSize*ySize);
+    }
     QFile openDefaultDir("HistogramData.txt");
     QTextStream in(&openDefaultDir);
     openDefaultDir.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);
-    knum = 1;
-    for(int ix = 1;ix <= Kx;ix++) in <<"The frequency of data's up-limited "<< Lu[ix-1]<<": "<< fresum[ix+Kx]  <<endl;
+    for(int ix = 0;ix < groupNum;ix++) in <<"The frequency of data's up-limited "<< res[0][ix]<<": "<< res[1][ix] <<endl;
     openDefaultDir.close();
-    return fresum;//fresum[0]为组数 从[1]-[Kx]开始为频率信息 [Kx+1]-[2*Kx+1]
+    return res;
 
 }
