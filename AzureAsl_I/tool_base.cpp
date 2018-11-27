@@ -1,5 +1,5 @@
 #include "tool_base.h"
-
+#include <algorithm>
 
 ToolBase::ToolBase()
 {
@@ -88,4 +88,46 @@ QVector<QVector<double> >ToolBase::ToolVPowerSpectralDensity(double **matrix){
     for(int i=0; i<ySize/2; i++) res[1][i] /= xSize;
     fftw_free(out);
     return res;
+}
+QVector<QVector<double> > ToolBase::Historgram(double **matrix)
+{
+    double dataMax = matrix[0][0];
+    double dataMin = matrix[0][0];
+    for(int i = 0;i < ySize;i++){
+        for(int j = 0;j < xSize;j++){
+           double temp;
+           temp = matrix[i][j];
+           if(temp > dataMax) dataMax = temp;
+           if(temp < dataMin) dataMin = temp;
+        }
+    }
+    double dataRange = dataMax - dataMin;//get the range
+    int groupNum = 2 + 3.32*log10(xSize*ySize); //Sturges empirical formula
+    double groupDistance = dataRange / groupNum;
+    QVector<QVector<double>> res(2,QVector<double>(groupNum));
+    res[0][0]= dataMin;
+    for(int i = 0;i < groupNum - 1; i++){
+        res[0][i+1] = res[0][i] + groupDistance;
+    }
+    QVector<double> dataFrequency(groupNum,0);
+    for(int i = 0;i < ySize;i++){
+        for(int j = 0;j < xSize;j++){
+            for(int ix = 1;ix < groupNum;ix++){
+                if(matrix[i][j] < res[0][ix]){
+                    dataFrequency[ix-1]++;
+                    break;
+                }
+            }
+        }
+    }
+    for(int ix = 0;ix < groupNum;ix++) {
+        res[1][ix] = dataFrequency[ix] * 100 / (xSize*ySize);
+    }
+    QFile openDefaultDir("HistogramData.txt");
+    QTextStream in(&openDefaultDir);
+    openDefaultDir.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate);
+    for(int ix = 0;ix < groupNum;ix++) in <<"The frequency of data's up-limited "<< res[0][ix]<<": "<< res[1][ix] <<endl;
+    openDefaultDir.close();
+    return res;
+
 }

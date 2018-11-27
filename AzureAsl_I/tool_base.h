@@ -3,7 +3,6 @@
 
 #include "qcustomplot.h"
 #include "fftw3.h"
-
 class ToolBase
 {
 
@@ -19,6 +18,7 @@ public:
 
 
 public:
+    QVector<QVector<double> > Historgram(double** matrix);
     explicit ToolBase();
     QVector<QVector<double> > ToolCrossLine(double **matrix, int lastX, int lastY, int endX, int endY);
     QVector<QVector<double> > ToolHPowerSpectralDensity(double **matrix);
