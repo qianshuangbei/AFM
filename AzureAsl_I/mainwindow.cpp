@@ -29,7 +29,18 @@
 #include "math.h"
 #include "plotlines.h"
 #include "tool_base.h"
-
+#include <stdlib.h>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMainWindow>
+#include <QtCharts/QChartView>
+#include <QtCharts/QBarSeries>
+#include <QtCharts/QBarSet>
+#include <QtCharts/QLegend>
+#include <QtCharts/QBarCategoryAxis>
+#include <QChartView>
+#include <QChart>
+#include <QString>
+QT_CHARTS_USE_NAMESPACE
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -39,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _mouseActive = false;
     _isDoubleChannel= false;
 /*
- * 偏置
+ * *偏置
 */
     yOffset = 0;
     xOffset = 0;
@@ -61,6 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->CurveImagePlot->setVisible(false);
     ui->TwoDImageIIPlot->setVisible(false);
     ui->CurveImageIIPlot->setVisible(false);
+    ui->Historgram->setVisible(false);
     ui->CurveImagePlot->plotLayout()->insertRow(0);
     ui->CurveImagePlot->plotLayout()->addElement(0,0, new QCPTextElement(ui->CurveImagePlot, "2D plot"));
     ui->newtable->setGeometry(-1,-1,-1,-1);
@@ -92,7 +104,7 @@ bool MainWindow::LoadDataFile(const QString &fileName, const int index, double *
 
     std::string nanoFileName = fileName.toStdString();
     FILE *nanoFile = fopen(nanoFileName.c_str(), "rb");
-    fseek(nanoFile , _dataManager->dataOffset[0], 0);
+    fseek(nanoFile , _dataManager->dataOffset[0], 0);//指针偏移到数据起始点
     fread( pData, 2, _dataManager->dataLength[index+1]/2 , nanoFile);
     double zScale = _dataManager->dataZScale[index];
     double sScale = _dataManager->dataSScale[index];
@@ -332,7 +344,7 @@ void MainWindow::on_actionSection_triggered()
     ui->TwoDImagePlot->replot();
     if(_pressRelease)
         update();
-    ui->CurveImagePlot->setGeometry(700, 50, 700, 400);
+    ui->CurveImagePlot->setGeometry(700, 50, 700, 300);
     ui->CurveImagePlot->clearGraphs();
     ui->CurveImagePlot->replot();
     ui->CurveImagePlot->xAxis2->setVisible(true);
@@ -440,7 +452,7 @@ void MainWindow::on_actionRoughness_triggered()
 void MainWindow::on_actionPower_Spectral_Denstiy_triggered()
 {
     viewerMode();
-    ui->CurveImagePlot->setGeometry(700, 50, 700, 400);
+    ui->CurveImagePlot->setGeometry(700, 50, 700, 300);
     ToolBase *psd = new ToolBase();
     psd->xSize= nSize;
     psd->ySize= mSize;
@@ -691,6 +703,43 @@ void MainWindow::on_actionThree_Dimension_triggered()
 
 }
 
+void MainWindow::on_actionFlatten_triggered()
+{
+
+}
+void MainWindow::on_actionHistogram_triggered()
+{
+    ToolBase *psd = new ToolBase();
+    psd->xSize= nSize;
+    psd->ySize= mSize;
+    QVector<QVector<double>> psdRes = psd->Historgram(allChannel.back());
+    int groupNum = psdRes[1].size();
+    QString slimit;
+    QBarSet *set0 = new QBarSet("hight information");
+    for(int ix = 0;ix < groupNum;ix++) *set0 << psdRes[1][ix];
+    QBarSeries *series = new QBarSeries();
+    series->append(set0);
+    QChart *chart = new QChart();
+    chart->addSeries(series);
+    chart->setTitle("Histogram");
+    chart->setAnimationOptions(QChart::SeriesAnimations);
+    
+    QStringList categories;
+    for(int ix = 0;ix < groupNum;ix++) categories << slimit.setNum(psdRes[0][ix],'g',3);
+    QBarCategoryAxis *axis = new QBarCategoryAxis();
+    axis->append(categories);
+    chart->createDefaultAxes();
+    chart->setAxisX(axis, series);
+    chart->legend()->setVisible(true);
+    chart->legend()->setAlignment(Qt::AlignBottom);
+    ui->Historgram->setVisible(true);
+    ui->Historgram->setChart(chart);
+    ui->Historgram->setRenderHint(QPainter::Antialiasing);
+    /*
+     xAxis shows the lowerlimit of the data.  x[i] <= data[i] < x[i+1]
+     */
+}
+
 void MainWindow::on_actionViewer_triggered()
 {
     viewerMode();
@@ -701,6 +750,7 @@ void MainWindow::viewerMode(){
     disconnect(ui->TwoDImagePlot, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
     disconnect(ui->TwoDImagePlot, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
     ui->CurveImagePlot->setVisible(false);
+    ui->Historgram->setVisible(false);
     ui->TwoDImagePlot->setSelectionRectMode(QCP::srmRaphRect);
     ui->TwoDImagePlot->selectionRect()->setPen(QPen(Qt::white));
     curPoint=lastPoint;
@@ -711,3 +761,4 @@ void MainWindow::viewerMode(){
 //    _mouseActive = false;
 //    ui->TwoDImagePlot->setMouseTracking(false);
 }
+
