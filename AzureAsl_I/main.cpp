@@ -2,10 +2,8 @@
 #include "loginui.h"
 #include <QApplication>
 #include <QtCore/QFile>
-
-
-
-
+#include <QtCharts>
+using namespace QtCharts;
 int main(int argc, char *argv[])
 {
 

@@ -7,13 +7,13 @@
 QT       += core gui
 QT       += opengl
 QT       += datavisualization
-
+QT       += charts
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 TARGET = AzureAsl
 TEMPLATE = app
 
-!include( E:\Qt5.11\Examples\Qt-5.11.0\datavisualization\examples.pri ) {
+!include( E:\Qt\Examples\Qt-5.11.1\datavisualization\examples.pri ) {
     error( "Couldn't find the examples.pri file!" )
 }
 
@@ -48,10 +48,9 @@ FORMS    += mainwindow.ui \
 
 RC_ICONS =desk.ico\
 
-LIBS += E:\Qt\5.5\mingw492_32\fftw-3.3.4-dll32\libfftw3-3.dll
-INCLUDEPATH += E:\Qt\5.5\mingw492_32\fftw-3.3.4-dll32
-DEPENDPATH += E:\Qt\5.5\mingw492_32\fftw-3.3.4-dll32
-
+LIBS += E:\QTCode\fftw-3.3.4-dll32\libfftw3-3.dll
+INCLUDEPATH += E:\QTCode\fftw-3.3.4-dll32
+DEPENDPATH += E:\QTCode\fftw-3.3.4-dll32
 
 
 
