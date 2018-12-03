@@ -57,6 +57,10 @@ private slots:
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
 
+    void on_actionFlatten_triggered();
+
+    void on_actionHistogram_triggered();
+
 signals:
     void mousePress(QMouseEvent*);
     void mouseRelease(QMouseEvent*);
